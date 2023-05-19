@@ -25,6 +25,7 @@ interface PocketBaseAPI {
     @POST("api/collections/surveyResults/records")
     suspend fun uploadForm(
         @Header("Authorization") bearerToken: String,
+        //TODO: Add user ID (Surveys are not preassigned)
         @Part("surveyRequest") surveyID: RequestBody,
         @Part("formData") formData: RequestBody,
         @Part filePart: MultipartBody.Part

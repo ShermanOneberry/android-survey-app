@@ -142,20 +142,6 @@
                     "max": null,
                     "pattern": ""
                 }
-            },
-            {
-                "id": "vysrdaz0",
-                "name": "assignedUser",
-                "type": "relation",
-                "system": false,
-                "required": false,
-                "options": {
-                    "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": []
-                }
             }
         ],
         "indexes": [
@@ -182,6 +168,20 @@
                 "required": true,
                 "options": {
                     "collectionId": "9jhzcgy0yo8egqd",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": []
+                }
+            },
+            {
+                "id": "9ihtlclg",
+                "name": "assignedUser",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
                     "cascadeDelete": false,
                     "minSelect": null,
                     "maxSelect": 1,
@@ -216,7 +216,7 @@
         ],
         "listRule": null,
         "viewRule": null,
-        "createRule": "@request.auth.id = surveyRequest.assignedUser.id",
+        "createRule": "@request.auth.id = assignedUser.id",
         "updateRule": null,
         "deleteRule": null,
         "options": {}
