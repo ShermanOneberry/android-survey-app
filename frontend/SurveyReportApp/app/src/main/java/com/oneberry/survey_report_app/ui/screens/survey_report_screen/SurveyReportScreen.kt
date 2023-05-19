@@ -231,6 +231,7 @@ fun SurveyReportScreen(surveyReportViewModel: SurveyReportViewModel = viewModel(
                 errorMessage = surveyReportUiState.nonFeasibleExplanationError()
             )
         }
+        //TODO: Add boolean toggle here. We either must have notes+single_image, or neither at all
         TextInputTemplate(
             fieldTitle = "Additional Notes",
             fieldInput = surveyReportUiState.techniciansNotes,
@@ -239,6 +240,7 @@ fun SurveyReportScreen(surveyReportViewModel: SurveyReportViewModel = viewModel(
             onInputChange = {surveyReportViewModel.updateTechniciansNotes(it)},
             errorMessage = null
         )
+        //TODO: Add single image picker here
         Button(onClick = {
             Log.d("ButtonEvent", "This should not happen quickly");
             surveyReportViewModel.triggerSubmission()
