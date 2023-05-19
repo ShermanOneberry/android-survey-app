@@ -29,21 +29,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-//TODO: Delete below, but maybe remember the concept of Preview
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-            text = "Hello $name!",
-            modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SurveyReportAppTheme {
-        Greeting("Android")
-    }
-}
