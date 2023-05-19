@@ -34,7 +34,7 @@ data class SurveyReportUIState(
     //TODO: Should I ask for optional additional info?
     //Template for Stairway //TODO: Check if it's complete
     val stairwayLowerLevel: String = "1",
-    //TODO: Template for Ground
+    //TODO: Template for Ground, add enum between "Grass patch", "Void deck" and neither
     //Template for MSCP //TODO: Check if complete
     val carparkLevel: String = "3A",
     //TODO: Template for Roof
