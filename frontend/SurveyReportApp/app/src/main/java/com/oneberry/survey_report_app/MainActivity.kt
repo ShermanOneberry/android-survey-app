@@ -6,11 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.oneberry.survey_report_app.ui.survey_report_activity.SurveyReportScreen
+import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportScreen
 import com.oneberry.survey_report_app.ui.theme.SurveyReportAppTheme
 
 class MainActivity : ComponentActivity() {

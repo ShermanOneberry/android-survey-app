@@ -4,7 +4,7 @@ import android.util.Log
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
 import com.oneberry.survey_report_app.test_util.isUnitTest
-import com.oneberry.survey_report_app.ui.survey_report_activity.SurveyReportUIState
+import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportUIState
 import io.goodforgod.gson.configuration.GsonFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,9 +29,6 @@ class PocketBaseRepository() {
         .build()
     private val service: PocketBaseAPI = retrofit.create(PocketBaseAPI::class.java)
 
-    //TODO: Fix crash when attempting to connect to absent server
-    //      (server is down => app crash => bad)
-    //      (Should instead result in returning null)
     suspend fun getApiToken(identity:String, password:String) : String? {
         return withContext(Dispatchers.IO) {
             when (val response = service.getBearerToken(identity, password)) {

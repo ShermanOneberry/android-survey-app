@@ -1,4 +1,4 @@
-package com.oneberry.survey_report_app.ui.survey_report_activity
+package com.oneberry.survey_report_app.ui.screens.survey_report_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

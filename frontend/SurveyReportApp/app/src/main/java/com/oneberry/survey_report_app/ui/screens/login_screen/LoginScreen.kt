@@ -1,4 +1,4 @@
-package com.oneberry.survey_report_app.ui.login_activity
+package com.oneberry.survey_report_app.ui.screens.login_screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

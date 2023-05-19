@@ -1,7 +1,7 @@
 package com.oneberry.survey_report_app
 
 import com.oneberry.survey_report_app.network.PocketBaseRepository
-import com.oneberry.survey_report_app.ui.survey_report_activity.SurveyReportUIState
+import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportUIState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
