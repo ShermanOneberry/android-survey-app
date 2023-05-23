@@ -42,8 +42,8 @@ class UserCredentialsRepository(context: Context){
             else GSON.fromJson(preferences[USER_CREDENTIALS_KEY], UserCredentials::class.java)
         }
 
-    private suspend fun saveToPreferencesStore(userCredentials: UserCredentials, context: Context) {
-        context.dataStore.edit { preferences ->
+    suspend fun saveToPreferencesStore(userCredentials: UserCredentials) {
+        preference_datastore.edit { preferences ->
             preferences[USER_CREDENTIALS_KEY] = GSON.toJson(userCredentials)
         }
     }

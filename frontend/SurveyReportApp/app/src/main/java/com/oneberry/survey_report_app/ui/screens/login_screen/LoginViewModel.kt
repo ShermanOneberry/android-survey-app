@@ -6,11 +6,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.UserCredentials
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.PocketBaseRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel (
@@ -33,24 +37,64 @@ class LoginViewModel (
         }
     }
     // UI state
-    private val _uiState = MutableStateFlow(LoginUIState())
+    private val _uiState = MutableStateFlow(LoginUIState()) //TODO: Grab username at some point
     val uiState: StateFlow<LoginUIState> = _uiState.asStateFlow()
+    //Toast emitter
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage = _toastMessage.asSharedFlow()
 
-    fun canAttemptLogin(): Boolean {
+    fun updateUsername(newUsername: String) {
+        if (newUsername.contains("\n")) return
+        _uiState.update { currentState ->
+            currentState.copy(username = newUsername)
+        }
+    }
+    fun updatePassword(newPassword: String) {
+        if (newPassword.contains("\n")) return
+        _uiState.update { currentState ->
+            currentState.copy(password = newPassword)
+        }
+    }
+
+    private fun canAttemptLogin(): Boolean {
         val (username, password) = uiState.value
         return !(username.isEmpty() || password.isEmpty())
     }
+    private fun lockUi() {
+        _uiState.update { currentState ->
+            currentState.copy(uiEnabled = false)
+        }
+    }
+    private suspend fun unlockUiWithError(message:String){
+        _toastMessage.emit(message)
+        _uiState.update { currentState ->
+            currentState.copy(uiEnabled = true)
+        }
+    }
 
     fun attemptLogin() {
+        lockUi()
         viewModelScope.launch {
             if (!canAttemptLogin()) {
-                //TODO: Do something with a toast
+                unlockUiWithError("Cannot have blank username or password")
                 return@launch
             }
             val (username, password) = uiState.value
-            //TODO
-            //backendAPI.getApiToken(username, password)
-            //Check if backend api gives ok, if so upload to datastore repo and return to form
+            val tokenResult = backendAPI.getApiToken(username, password)
+            if (tokenResult == null) {
+                unlockUiWithError("Could not login")
+                return@launch
+            }
+            val (id, token, validUntil) = tokenResult
+            userCredentialsRepository.saveToPreferencesStore(UserCredentials(
+                username = username,
+                id = id,
+                token = token,
+                validUntil = validUntil,
+            ))
+            _uiState.update { currentState ->
+                currentState.copy(successfulLogin = true)
+            }
         }
     }
 
