@@ -43,9 +43,21 @@ class ApiUnitTest {
             reasonImage = testImage
             )
         val surveyRequestID = "b7z7sachnw3uqlg" //TODO: Replace this with auto generation
-        val surveyResultID = wrapper.uploadForm(
-            surveyRequestID, survey
-        )
-        assertNotNull(surveyResultID)
+
+        val tokenApiResult = wrapper
+            .getApiToken("dummy", "password1234")
+        if (tokenApiResult == null) fail("BearerToken should not be null")
+        else {
+            println(tokenApiResult.id)
+            val surveyResultID = wrapper.uploadForm(
+                tokenApiResult.token,
+                surveyRequestID,
+                tokenApiResult.id,
+                survey
+            )
+            assertNotNull(surveyResultID)
+        }
+
+
     }
 }

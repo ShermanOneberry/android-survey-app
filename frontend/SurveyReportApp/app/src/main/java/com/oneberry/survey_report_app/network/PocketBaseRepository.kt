@@ -15,7 +15,11 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.time.LocalDateTime
 
+private const val TOKEN_LIFETIME_SECONDS:Long = 1209600
+private const val ONE_HOUR_IN_SECONDS:Long = 60 * 60
+private const val TOKEN_EARLY_EXPIRE_SECONDS:Long = ONE_HOUR_IN_SECONDS
 
 class PocketBaseRepository() {
     private val GSON = GsonFactory().build()
@@ -29,24 +33,38 @@ class PocketBaseRepository() {
         .build()
     private val service: PocketBaseAPI = retrofit.create(PocketBaseAPI::class.java)
 
-    suspend fun getApiToken(identity:String, password:String) : String? {
+    suspend fun getApiToken(identity:String, password:String) : AuthApiData? {
         return withContext(Dispatchers.IO) {
             when (val response = service.getBearerToken(identity, password)) {
-                is NetworkResponse.Success -> return@withContext response.body.token
+                is NetworkResponse.Success -> {
+                    return@withContext AuthApiData(
+                        id = response.body.record.id,
+                        token = response.body.token,
+                        validUntil =
+                            LocalDateTime.now().plusSeconds(
+                                TOKEN_LIFETIME_SECONDS - TOKEN_EARLY_EXPIRE_SECONDS
+                            ),
+                    )
+                }
                 is NetworkResponse.Error -> return@withContext null
             }
         }
     }
 
-    suspend fun uploadForm(surveyId: String, surveyData: SurveyReportUIState) : String? {
+    suspend fun uploadForm(
+        bearerToken: String,
+        surveyId: String,
+        userId: String,
+        surveyData: SurveyReportUIState,
+    ) : String? {
         return withContext(Dispatchers.IO) {
             if (!surveyData.isFeasible) return@withContext null
-            //Header part //TODO: Have credentials no longer hardcoded
-            val bearerToken =
-                getApiToken("dummy", "password1234") ?: return@withContext null
             //ID part //TODO: Replace this with auto generation from batch num and id,
             //                either logically or through query
-            val idPart = surveyId
+            val surveyIdPart = surveyId
+                .toRequestBody("text/plain; charset=utf-8".toMediaTypeOrNull())
+
+            val userIdPart = userId
                 .toRequestBody("text/plain; charset=utf-8".toMediaTypeOrNull())
             //Json part
             val jsonPart = GSON.toJson(surveyData)
@@ -61,7 +79,7 @@ class PocketBaseRepository() {
                     .asRequestBody("image/*".toMediaTypeOrNull())
             )
             val response = service.uploadForm(
-                bearerToken, idPart, jsonPart, filePart
+                bearerToken, surveyIdPart, userIdPart, jsonPart, filePart
             )
             when (response) {
                 is NetworkResponse.Success -> return@withContext response.body.id

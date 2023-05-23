@@ -27,6 +27,7 @@ interface PocketBaseAPI {
         @Header("Authorization") bearerToken: String,
         //TODO: Add user ID (Surveys are not preassigned)
         @Part("surveyRequest") surveyID: RequestBody,
+        @Part("assignedUser") userID: RequestBody,
         @Part("formData") formData: RequestBody,
         @Part filePart: MultipartBody.Part
     ): NetworkResponse<PostFormApiBody, ErrorBody>

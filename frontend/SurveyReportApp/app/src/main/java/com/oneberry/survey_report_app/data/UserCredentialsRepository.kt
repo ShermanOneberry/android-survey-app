@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-import java.time.LocalDateTime
 
 
 private const val USER_CREDENTIALS_NAME = "user_credentials"
@@ -49,10 +48,3 @@ class UserCredentialsRepository(context: Context){
         }
     }
 }
-
-data class UserCredentials(
-    val username: String? = null,
-    val id: String? = null,
-    val token: String? = null,
-    val goodUntilDateTime: LocalDateTime? = null,
-)

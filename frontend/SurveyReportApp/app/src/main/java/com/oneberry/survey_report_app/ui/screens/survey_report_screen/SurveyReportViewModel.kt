@@ -154,8 +154,26 @@ class SurveyReportViewModel (
                 emitToast("Current form is not valid")
                 return@launch
             }
+            val credentials = credentialsState.value
+            if (credentials == null) {
+                emitToast("You need to login to submit")
+                return@launch
+            }
+            if (credentials.username == null) {
+                emitToast("You need to login to submit")
+                return@launch
+            }
+            if (!credentials.isValidCredentials(LocalDateTime.now())) {
+                emitToast("You need to login again, your session has expired.")
+                return@launch
+            }
             val surveyRequestID = "b7z7sachnw3uqlg"
-            val surveyResponseID = backendAPI.uploadForm(surveyRequestID, finalFormData)
+            val surveyResponseID = backendAPI.uploadForm(
+                credentials.token!!,
+                surveyRequestID,
+                credentials.id!!,
+                finalFormData
+            )
             if (surveyResponseID == null) {
                 _toastMessage.emit("Unable to submit form")
             } else {
