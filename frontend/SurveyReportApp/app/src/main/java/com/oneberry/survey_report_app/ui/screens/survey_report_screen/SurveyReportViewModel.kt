@@ -1,5 +1,6 @@
 package com.oneberry.survey_report_app.ui.screens.survey_report_screen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -8,13 +9,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.UserCredentials
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.PocketBaseRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -40,7 +44,17 @@ class SurveyReportViewModel (
         }
     }
     // DataStore Repository
-    val credentialsState = userCredentialsRepository.credentialsFlow.asLiveData()
+    // TODO: Fix load jank (Or at least figure out whether to delibertly ignore the problem)
+    //       Consider either having a special initialValue with loading State
+    //       Alternatively, have StateFlow for ViewModel and LiveData for UI, as separate data structs
+    //       Resources: https://bladecoder.medium.com/kotlins-flow-in-viewmodels-it-s-complicated-556b472e281a
+    //       NOTE: Further reading suggests accessing LiveData in ViewModel using "viewModelScope.launch"
+    val credentialsState: StateFlow<UserCredentials> =
+        userCredentialsRepository.credentialsFlow.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = UserCredentials()
+        )
     // UI state
     private val _uiState = MutableStateFlow(getFreshState())
     val uiState: StateFlow<SurveyReportUIState> = _uiState.asStateFlow()

@@ -85,8 +85,22 @@ fun SurveyReportScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        Button(onClick = { navigateToLogin() }) {
-            Text("Login")
+        val displayUser = surveyReportViewModel.credentialsState.collectAsState().value.username
+        if (displayUser != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = displayUser)
+                Button(onClick = { navigateToLogin() }) {
+                    Text("Change User")
+                }
+            }
+        } else {
+            Button(onClick = { navigateToLogin() }) {
+                Text("Login")
+            }
         }
         TextInputTemplate(
             fieldTitle = "Batch number",
