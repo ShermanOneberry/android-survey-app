@@ -22,21 +22,23 @@ import java.time.LocalDateTime
 
 class SurveyReportViewModel (
     private val userCredentialsRepository: UserCredentialsRepository,
+    private val backendAPI: PocketBaseRepository,
 ): ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
+                val app = (this[APPLICATION_KEY] as SurveyApplication)
                 val userCredentialsRepository =
-                    (this[APPLICATION_KEY] as SurveyApplication).userCredentialsRepository
+                    app.userCredentialsRepository
+                val backendAPI =
+                    app.backendAPI
                 SurveyReportViewModel(
                     userCredentialsRepository = userCredentialsRepository,
+                    backendAPI = backendAPI,
                 )
             }
         }
     }
-
-    // API variables
-    private val API = PocketBaseRepository()
     // DataStore Repository
     val credentialsState = userCredentialsRepository.credentialsFlow.asLiveData()
     // UI state
@@ -147,13 +149,13 @@ class SurveyReportViewModel (
     fun triggerSubmission() {
         //TODO: Have this trigger navigation to a preview screen/dialog instead of immediately submitting
         viewModelScope.launch {
-            val finalFormData =  _uiState.value.copy(submissionTime = LocalDateTime.now())
+            val finalFormData =  uiState.value.copy(submissionTime = LocalDateTime.now())
             if (!finalFormData.overallSurveyValid()) {
                 emitToast("Current form is not valid")
                 return@launch
             }
             val surveyRequestID = "b7z7sachnw3uqlg"
-            val surveyResponseID = API.uploadForm(surveyRequestID, finalFormData)
+            val surveyResponseID = backendAPI.uploadForm(surveyRequestID, finalFormData)
             if (surveyResponseID == null) {
                 _toastMessage.emit("Unable to submit form")
             } else {

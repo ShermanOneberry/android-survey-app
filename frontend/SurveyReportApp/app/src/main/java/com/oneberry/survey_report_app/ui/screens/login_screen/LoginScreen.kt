@@ -27,10 +27,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
+import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportViewModel
 
 @Composable
 fun LoginScreen(
+    loginViewModel: LoginViewModel =
+        viewModel(factory = LoginViewModel.Factory),
     popBackStack: () -> Boolean,
     popUpToForm: () -> Unit,
     contentPadding: PaddingValues,
@@ -52,17 +56,15 @@ fun LoginScreen(
         val password = remember { mutableStateOf(TextFieldValue()) }
 
         Text(
-            text = stringResource(R.string.app_name),
+            text = stringResource(R.string.login),
             style = MaterialTheme.typography.titleLarge,
         )
 
-        Spacer(modifier = Modifier.height(mediumPadding))
         TextField( //TODO: Replace these with text box template
             label = { Text(text = "Username") },
             value = username.value,
             onValueChange = { username.value = it })
 
-        Spacer(modifier = Modifier.height(mediumPadding))
         TextField(
             label = { Text(text = "Password") },
             value = password.value,
@@ -70,7 +72,6 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             onValueChange = { password.value = it })
 
-        Spacer(modifier = Modifier.height(mediumPadding))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = { },

@@ -85,6 +85,9 @@ fun SurveyReportScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
+        Button(onClick = { navigateToLogin() }) {
+            Text("Login")
+        }
         TextInputTemplate(
             fieldTitle = "Batch number",
             fieldInput = surveyReportUiState.batchNum,
