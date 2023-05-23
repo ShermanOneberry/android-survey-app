@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,11 +24,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme.shapes
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,11 +49,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
-import com.oneberry.survey_report_app.file_system.getFile
+import com.oneberry.survey_report_app.util.getFile
 import java.io.File
 
 @Composable
-fun SurveyReportScreen(surveyReportViewModel: SurveyReportViewModel = viewModel()) {
+fun SurveyReportScreen(
+    surveyReportViewModel: SurveyReportViewModel =
+        viewModel(factory = SurveyReportViewModel.Factory),
+    navigateToLogin: () -> Unit,
+    navigateToPreview: () -> Unit,
+    contentPadding: PaddingValues,
+) {
     val surveyReportUiState by surveyReportViewModel.uiState.collectAsState()
     val isFeasible = surveyReportUiState.isFeasible
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
@@ -70,16 +77,16 @@ fun SurveyReportScreen(surveyReportViewModel: SurveyReportViewModel = viewModel(
     }
     Column(
         modifier = Modifier
+            .padding(contentPadding) //Margin
             .verticalScroll(rememberScrollState())
-            .padding(mediumPadding),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(mediumPadding), //Padding
+        verticalArrangement = Arrangement.spacedBy(
+            space = mediumPadding,
+            alignment = Alignment.CenterVertically
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        Text(
-            text = stringResource(R.string.app_name),
-            style = typography.titleLarge,
-        )
         TextInputTemplate(
             fieldTitle = "Batch number",
             fieldInput = surveyReportUiState.batchNum,

@@ -1,7 +1,14 @@
 package com.oneberry.survey_report_app.ui.screens.survey_report_screen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.PocketBaseRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,9 +20,25 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.time.LocalDateTime
 
-class SurveyReportViewModel: ViewModel() {
+class SurveyReportViewModel (
+    private val userCredentialsRepository: UserCredentialsRepository,
+): ViewModel() {
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val userCredentialsRepository =
+                    (this[APPLICATION_KEY] as SurveyApplication).userCredentialsRepository
+                SurveyReportViewModel(
+                    userCredentialsRepository = userCredentialsRepository,
+                )
+            }
+        }
+    }
+
     // API variables
     private val API = PocketBaseRepository()
+    // DataStore Repository
+    val credentialsState = userCredentialsRepository.credentialsFlow.asLiveData()
     // UI state
     private val _uiState = MutableStateFlow(getFreshState())
     val uiState: StateFlow<SurveyReportUIState> = _uiState.asStateFlow()

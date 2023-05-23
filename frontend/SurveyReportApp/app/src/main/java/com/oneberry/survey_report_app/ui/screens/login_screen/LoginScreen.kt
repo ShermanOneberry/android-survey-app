@@ -3,12 +3,15 @@ package com.oneberry.survey_report_app.ui.screens.login_screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,12 +30,22 @@ import androidx.compose.ui.unit.dp
 import com.oneberry.survey_report_app.R
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    popBackStack: () -> Boolean,
+    popUpToForm: () -> Unit,
+    contentPadding: PaddingValues,
+) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     Column(
-        modifier = Modifier.padding(mediumPadding),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .padding(contentPadding) //Margin
+            .verticalScroll(rememberScrollState())
+            .padding(mediumPadding), //Padding
+        verticalArrangement = Arrangement.spacedBy(
+            space = mediumPadding,
+            alignment = Alignment.CenterVertically
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
         val username = remember { mutableStateOf(TextFieldValue()) }
