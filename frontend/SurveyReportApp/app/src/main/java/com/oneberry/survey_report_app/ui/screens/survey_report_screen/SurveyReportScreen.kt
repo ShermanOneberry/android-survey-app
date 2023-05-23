@@ -28,7 +28,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,7 +42,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -249,7 +247,7 @@ fun SurveyReportScreen(
         )
         //TODO: Add single image picker here
         Button(onClick = {
-            Log.d("ButtonEvent", "This should not happen quickly");
+            Log.d("ButtonEvent", "This should not happen quickly")
             surveyReportViewModel.triggerSubmission()
         },
             enabled = true
@@ -272,7 +270,6 @@ fun LocationMenuSelectionPreview() {
 fun LocationMenuSelection(
     selectedOption: LocationType,
     onOptionChange: (LocationType) -> Unit) {
-    val context = LocalContext.current
     val options = LocationType.values().map{it.value}
     var expanded by remember { mutableStateOf(false) }
 
