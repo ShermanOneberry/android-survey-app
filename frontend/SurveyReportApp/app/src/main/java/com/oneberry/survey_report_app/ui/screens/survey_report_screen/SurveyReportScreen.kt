@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -104,6 +105,9 @@ fun SurveyReportScreen(
                 Text("Login")
             }
         }
+
+        Divider()
+
         TextInputTemplate(
             fieldTitle = "Batch number",
             fieldInput = surveyReportUiState.batchNum,
@@ -120,6 +124,9 @@ fun SurveyReportScreen(
             onInputChange = { surveyReportViewModel.updateIntraBatchId(it) },
             errorMessage = surveyReportUiState.intraBatchIdError(),
         )
+
+        Divider()
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -138,6 +145,9 @@ fun SurveyReportScreen(
             surveyReportUiState.reasonImage,){
             surveyReportViewModel.updateReasonImage(it)
         }
+
+        Divider()
+
         if (isFeasible) {
             TextInputTemplate(
                 fieldTitle = "Distance to Unit",
@@ -163,6 +173,8 @@ fun SurveyReportScreen(
                 onInputChange = { surveyReportViewModel.updateBoxCount(it) },
                 errorMessage = surveyReportUiState.boxCountError()
             )
+
+            Divider()
 
             LocationMenuSelection(surveyReportUiState.locationType) {
                 surveyReportViewModel.updateLocationType(it)
@@ -200,7 +212,9 @@ fun SurveyReportScreen(
                 }
 
                 LocationType.GROUND -> {
-                    //TODO: Discuss whether anything specific would be needed for this category
+                    GroundOptionMenuSelection(surveyReportUiState.groundType) {
+                        surveyReportViewModel.updateGroundType(it)
+                    }
                 }
 
                 LocationType.MULTISTORYCARPARK -> {
@@ -255,16 +269,38 @@ fun SurveyReportScreen(
                 errorMessage = surveyReportUiState.nonFeasibleExplanationError()
             )
         }
-        //TODO: Add boolean toggle here. We either must have notes+single_image, or neither at all
-        TextInputTemplate(
-            fieldTitle = "Additional Notes",
-            fieldInput = surveyReportUiState.techniciansNotes,
-            isFieldValid = true,
-            isFinalInput = true,
-            onInputChange = {surveyReportViewModel.updateTechniciansNotes(it)},
-            errorMessage = null
-        )
-        //TODO: Add single image picker here
+
+        Divider()
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(text =
+            "Add Additional Notes: "
+                    + if (surveyReportUiState.hasAdditionalNotes) "Yes" else "No")
+            Switch(
+                checked = surveyReportUiState.hasAdditionalNotes,
+                onCheckedChange = { surveyReportViewModel.updateHasAdditionalNotes(it) },
+            )
+        }
+        if (surveyReportUiState.hasAdditionalNotes) {
+            TextInputTemplate(//TODO: Get this to handle multi lines
+                fieldTitle = "Additional Notes",
+                fieldInput = surveyReportUiState.techniciansNotes,
+                isFieldValid = surveyReportUiState.techniciansNotesValid(),
+                isFinalInput = false,
+                onInputChange = { surveyReportViewModel.updateTechniciansNotes(it) },
+                errorMessage = surveyReportUiState.techniciansNotesError()
+            )
+            ImagePicker(
+                "Accompanying Image",
+                surveyReportUiState.extraImage,){
+                surveyReportViewModel.updateExtraImage(it)
+            }
+        }
+        Divider()
         Button(onClick = {
             Log.d("ButtonEvent", "This should not happen quickly")
             surveyReportViewModel.triggerSubmission()
@@ -295,7 +331,6 @@ fun LocationMenuSelection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            //.padding(32.dp) //TODO: See if this is actually needed in the full UI
     ) {
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -329,6 +364,50 @@ fun LocationMenuSelection(
         }
     }
 }
+
+@Composable
+fun GroundOptionMenuSelection(
+    selectedOption: GroundType,
+    onOptionChange: (GroundType) -> Unit) {
+    val options = GroundType.values().map{it.value}
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = !expanded
+            }
+        ) {
+            TextField(
+                value = selectedOption.value,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier.menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                options.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(text = item) },
+                        onClick = {
+                            expanded = false
+                            val newOption = GroundType.values().find { it.value == item } ?: selectedOption
+                            onOptionChange(newOption)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 @Preview
 @Composable
 fun TextInputPreview(){
@@ -349,7 +428,7 @@ fun TextInputTemplate(
     isFieldValid: Boolean,
     errorMessage: String?,
     onInputChange: (String) -> Unit,
-    isFinalInput: Boolean
+    isFinalInput: Boolean //TODO: Remove this I think
 ) {
     //TODO: Should this focusManger be called here or from the main screen composable?
     //TODO: Should I even bother with focus management? Take out if this causes too many bugs
@@ -396,7 +475,7 @@ fun ImagePicker(imageCategory: String, image: File?, updateImage: (File?) -> Uni
         contract = ActivityResultContracts.GetContent(),
         onResult = {updateImage(if (it != null) getFile(context,it) else null)}, //TODO: Check what happens if we don't declare an image
     )
-    Column(
+    Column( //TODO: Make text here red when nothing is selected
         modifier = Modifier
             .padding(mediumPadding),
         verticalArrangement = Arrangement.Center,

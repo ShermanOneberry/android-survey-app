@@ -122,6 +122,11 @@ class SurveyReportViewModel (
             currentState.copy(stairwayLowerLevel = newLevel)
         }
     }
+    fun updateGroundType(newGroundType: GroundType) {
+        _uiState.update { currentState ->
+            currentState.copy(groundType = newGroundType)
+        }
+    }
     fun updateCarparkLevel(newLevel: String) {
         if (newLevel.contains("\n")) return
         _uiState.update { currentState ->
@@ -146,9 +151,19 @@ class SurveyReportViewModel (
             currentState.copy(nearbyDescription = newNearby)
         }
     }
+    fun updateHasAdditionalNotes(newBoolean: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(hasAdditionalNotes = newBoolean)
+        }
+    }
     fun updateTechniciansNotes(newNotes: String) {
         _uiState.update { currentState ->
             currentState.copy(techniciansNotes = newNotes)
+        }
+    }
+    fun updateExtraImage(newPicture: File?) {
+        _uiState.update { currentState ->
+            currentState.copy(extraImage = newPicture)
         }
     }
     fun triggerSubmission() {
@@ -188,6 +203,7 @@ class SurveyReportViewModel (
     fun emitToast(message: String) {
         viewModelScope.launch {
             _toastMessage.emit(message)
+            Log.d("toast_message", message)
         }
     }
 }

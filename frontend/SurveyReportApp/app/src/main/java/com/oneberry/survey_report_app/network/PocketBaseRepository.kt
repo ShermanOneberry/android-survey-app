@@ -78,9 +78,28 @@ class PocketBaseRepository() {
                 reasonImage
                     .asRequestBody("image/*".toMediaTypeOrNull())
             )
-            val response = service.uploadForm(
-                bearerToken, surveyIdPart, userIdPart, jsonPart, filePart
-            )
+            val response = if (surveyData.hasAdditionalNotes) {
+                val extraImage: File = surveyData.extraImage!!
+                val extraFilePart = MultipartBody.Part.createFormData(
+                    "additionalImage",
+                    extraImage.name,
+                    extraImage
+                        .asRequestBody("image/*".toMediaTypeOrNull())
+                )
+                service.uploadFormWithExtraImage(
+                    bearerToken,
+                    surveyIdPart, userIdPart,
+                    jsonPart,
+                    filePart, extraFilePart
+                )
+            }else {
+                service.uploadFormNoExtraImage(
+                    bearerToken,
+                    surveyIdPart, userIdPart,
+                    jsonPart,
+                    filePart
+                )
+            }
             when (response) {
                 is NetworkResponse.Success -> return@withContext response.body.id
                 is NetworkResponse.Error -> {

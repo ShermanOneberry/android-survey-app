@@ -25,25 +25,26 @@ data class SurveyReportUIState(
     val boxCount: String = "1",
 
     val locationType: LocationType = LocationType.CORRIDOR,
-    //TODO: Templates for all option types
     //NOTE: I use product type to allow for form memory when filling in the form
-    //Template for Corridor //TODO: Check if it's complete
+    //Template for Corridor
     val corridorLevel: String = "2",
-    //TODO: Should I ask for optional additional info?
-    //Template for Stairway //TODO: Check if it's complete
+    //Template for Stairway
     val stairwayLowerLevel: String = "1",
-    //TODO: Template for Ground, add enum between "Grass patch", "Void deck" and neither
-    //Template for MSCP //TODO: Check if complete
+    //Template for Ground
+    val groundType: GroundType = GroundType.OTHER, //TODO: Integrate this option
+    //Template for MSCP
     val carparkLevel: String = "3A",
-    //TODO: Template for Roof
+    //No template for roof
 
     //Extra info (for all location types) (General location)
     val blockLocation: String = "Blk 1A",
     val streetLocation: String = "Sims Drive",
     val nearbyDescription: String = "", //Optional and context sensitive
 
+    val hasAdditionalNotes: Boolean = false, //TODO: Integrate this option
     val techniciansNotes: String = "",
-    //TODO: Add (list?) of photos for notes
+    @Transient //Provide image separately, rather than serialize
+    val extraImage: File? = null, //NOTE: NOT ALWAYS MANDATORY, ONLY WHEN WE HAVE ADDON NOTES
 
 ) {
     private fun isNumberFieldValid(field: String, minimumValue: Int = 1): Boolean {
@@ -129,8 +130,21 @@ data class SurveyReportUIState(
         return if (streetLocationValid()) null
         else "Street Location cannot be left blank"
     }
-    fun overallSurveyValid(): Boolean { //TODO: Update this along side actual fields
+    fun techniciansNotesValid(): Boolean {
+        return techniciansNotes.trim().isNotEmpty()
+    }
+    fun techniciansNotesError(): String? {
+        return if (techniciansNotesValid()) null
+        else "Cannot have empty notes"
+    }
+    fun overallSurveyValid(): Boolean { //Note: Update this along side actual fields
         if (reasonImage == null) return false
+
+        if (hasAdditionalNotes) {
+            if (extraImage == null || !techniciansNotesValid()) {
+                return false
+            }
+        }
 
         if (isFeasible) {
             when(locationType) {
@@ -141,7 +155,7 @@ data class SurveyReportUIState(
                     if (!stairwayLowerLevelValid()) return false
                 }
                 LocationType.GROUND -> {
-                    //TODO: Check if any extra requirements are needed
+                    //No extra requirements
                 }
                 LocationType.MULTISTORYCARPARK -> {
                     if (!carparkLevelValid()) return false
@@ -158,11 +172,15 @@ data class SurveyReportUIState(
     }
 }
 
-enum class LocationType(val value: String){ //TODO: Figure out specific template for each option
-    CORRIDOR("Corridor"), //TODO
+enum class LocationType(val value: String){
+    CORRIDOR("Corridor"),
     STAIRWAY("Stairway"),
     GROUND("Ground"),
     MULTISTORYCARPARK("Carpark"),
     ROOF("Roof")
 }
-
+enum class GroundType(val value: String){
+    VOID_DECK("Void Deck"),
+    GRASS_PATCH("Grass patch"),
+    OTHER("<Other>")
+}

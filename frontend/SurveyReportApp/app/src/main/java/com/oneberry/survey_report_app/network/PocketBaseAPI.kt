@@ -23,13 +23,24 @@ interface PocketBaseAPI {
 
     @Multipart
     @POST("api/collections/surveyResults/records")
-    suspend fun uploadForm(
+    suspend fun uploadFormNoExtraImage(
         @Header("Authorization") bearerToken: String,
         //TODO: Add user ID (Surveys are not preassigned)
         @Part("surveyRequest") surveyID: RequestBody,
         @Part("assignedUser") userID: RequestBody,
         @Part("formData") formData: RequestBody,
         @Part filePart: MultipartBody.Part
+    ): NetworkResponse<PostFormApiBody, ErrorBody>@Multipart
+
+    @POST("api/collections/surveyResults/records")
+    suspend fun uploadFormWithExtraImage(
+        @Header("Authorization") bearerToken: String,
+        //TODO: Add user ID (Surveys are not preassigned)
+        @Part("surveyRequest") surveyID: RequestBody,
+        @Part("assignedUser") userID: RequestBody,
+        @Part("formData") formData: RequestBody,
+        @Part filePart1: MultipartBody.Part,
+        @Part filePart2: MultipartBody.Part
     ): NetworkResponse<PostFormApiBody, ErrorBody>
 
 }
