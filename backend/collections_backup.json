@@ -209,6 +209,20 @@
                     "thumbs": [],
                     "protected": true
                 }
+            },
+            {
+                "id": "4hbougp8",
+                "name": "additionalImage",
+                "type": "file",
+                "system": false,
+                "required": false,
+                "options": {
+                    "maxSelect": 1,
+                    "maxSize": 5242880,
+                    "mimeTypes": [],
+                    "thumbs": [],
+                    "protected": true
+                }
             }
         ],
         "indexes": [
