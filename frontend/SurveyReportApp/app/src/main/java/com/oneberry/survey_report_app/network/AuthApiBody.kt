@@ -12,5 +12,5 @@ data class UserRecord (
 data class AuthApiData (
     val id: String,
     val token: String,
-    val validUntil: LocalDateTime,
+    val tokenObtainedTime: LocalDateTime,
 )

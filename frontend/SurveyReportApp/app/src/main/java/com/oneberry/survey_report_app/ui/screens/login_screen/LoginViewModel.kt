@@ -85,12 +85,12 @@ class LoginViewModel (
                 unlockUiWithError("Could not login")
                 return@launch
             }
-            val (id, token, validUntil) = tokenResult
+            val (id, token, tokenObtainedTime) = tokenResult
             userCredentialsRepository.saveToPreferencesStore(UserCredentials(
                 username = username,
                 id = id,
                 token = token,
-                validUntil = validUntil,
+                tokenObtainedTime = tokenObtainedTime,
             ))
             _uiState.update { currentState ->
                 currentState.copy(successfulLogin = true)

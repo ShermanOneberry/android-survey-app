@@ -17,10 +17,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.time.LocalDateTime
 
-private const val TOKEN_LIFETIME_SECONDS:Long = 1209600
-private const val ONE_HOUR_IN_SECONDS:Long = 60 * 60
-private const val TOKEN_EARLY_EXPIRE_SECONDS:Long = ONE_HOUR_IN_SECONDS
-
 class PocketBaseRepository() {
     private val GSON = GsonFactory().build()
     private val API_URL =
@@ -40,10 +36,8 @@ class PocketBaseRepository() {
                     return@withContext AuthApiData(
                         id = response.body.record.id,
                         token = response.body.token,
-                        validUntil =
-                            LocalDateTime.now().plusSeconds(
-                                TOKEN_LIFETIME_SECONDS - TOKEN_EARLY_EXPIRE_SECONDS
-                            ),
+                        tokenObtainedTime =
+                            LocalDateTime.now(),
                     )
                 }
                 is NetworkResponse.Error -> return@withContext null
