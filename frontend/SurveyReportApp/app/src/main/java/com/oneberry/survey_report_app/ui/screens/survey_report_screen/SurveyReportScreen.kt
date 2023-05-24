@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -85,8 +86,9 @@ fun SurveyReportScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        val displayUser = surveyReportViewModel.credentialsState.collectAsState().value.username
-        if (displayUser != null) {
+        val displayUser =
+            surveyReportViewModel.credentialLiveData.observeAsState().value?.username
+        if(displayUser != null) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,

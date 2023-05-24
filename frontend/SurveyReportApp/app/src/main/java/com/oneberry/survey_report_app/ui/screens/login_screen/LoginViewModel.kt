@@ -37,7 +37,7 @@ class LoginViewModel (
         }
     }
     // UI state
-    private val _uiState = MutableStateFlow(LoginUIState()) //TODO: Grab username at some point
+    private val _uiState = MutableStateFlow(LoginUIState()) //TODO: Initialize username from navigation parameter
     val uiState: StateFlow<LoginUIState> = _uiState.asStateFlow()
     //Toast emitter
     private val _toastMessage = MutableSharedFlow<String>()
