@@ -10,8 +10,6 @@ data class SurveyReportUIState(
     @Transient
     val intraBatchId: String = "1",
     //Metadata about report
-    @Transient //TODO: Double check whether team assignment is known ahead of time
-    val reportingTeam: String,
     val submissionTime: LocalDateTime? = null,
 
     val isFeasible: Boolean = true,

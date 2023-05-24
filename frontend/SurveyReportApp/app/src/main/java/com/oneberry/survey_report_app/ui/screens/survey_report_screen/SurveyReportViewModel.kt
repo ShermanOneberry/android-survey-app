@@ -56,9 +56,7 @@ class SurveyReportViewModel (
     val toastMessage = _toastMessage.asSharedFlow()
     //Init code
     private fun getFreshState(): SurveyReportUIState {
-        return SurveyReportUIState( //Completely fresh form.
-            reportingTeam = "Default Team" //TODO: Tie this to username, probably
-        )
+        return SurveyReportUIState() //Completely fresh form.
     }
     //Hooks
     fun updateBatchNum(newNum: String) {
