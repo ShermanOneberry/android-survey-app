@@ -212,10 +212,8 @@ class SurveyReportViewModel (
             }
         }
     }
-    fun emitToast(message: String) {
-        viewModelScope.launch {
-            _toastMessage.emit(message)
-            Log.d("toast_message", message)
-        }
+    private suspend fun emitToast(message: String) {
+        _toastMessage.emit(message) //TODO: Maybe have the toast duration be longer
+        Log.d("toast_message", message)
     }
 }
