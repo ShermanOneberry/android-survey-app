@@ -49,6 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
+import com.oneberry.survey_report_app.data.GroundType
+import com.oneberry.survey_report_app.data.LocationType
 import com.oneberry.survey_report_app.util.getFile
 import java.io.File
 

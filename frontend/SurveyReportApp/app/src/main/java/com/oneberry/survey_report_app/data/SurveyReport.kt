@@ -1,10 +1,10 @@
-package com.oneberry.survey_report_app.ui.screens.survey_report_screen
+package com.oneberry.survey_report_app.data
 
 import java.io.File
 import java.time.LocalDateTime
 
 
-data class SurveyReportUIState(
+data class SurveyReport(
     @Transient
     val batchNum: String = "1",
     @Transient

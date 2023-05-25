@@ -1,7 +1,6 @@
 package com.oneberry.survey_report_app.ui.screens.survey_report_screen
 
 import android.util.Log
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -10,17 +9,18 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.GroundType
+import com.oneberry.survey_report_app.data.LocationType
+import com.oneberry.survey_report_app.data.SurveyReport
+import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentials
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.PocketBaseRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -29,6 +29,7 @@ import java.time.LocalDateTime
 class SurveyReportViewModel (
     private val userCredentialsRepository: UserCredentialsRepository,
     private val backendAPI: PocketBaseRepository,
+    private val surveyReportRepository: SurveyReportRepository,
 ): ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -38,9 +39,12 @@ class SurveyReportViewModel (
                     app.userCredentialsRepository
                 val backendAPI =
                     app.backendAPI
+                val surveyReportRepository =
+                    app.surveyReportRepository
                 SurveyReportViewModel(
                     userCredentialsRepository = userCredentialsRepository,
                     backendAPI = backendAPI,
+                    surveyReportRepository = surveyReportRepository,
                 )
             }
         }
@@ -49,15 +53,11 @@ class SurveyReportViewModel (
     val credentialLiveData = userCredentialsRepository.credentialsFlow.asLiveData()
     private val credentialFlow = userCredentialsRepository.credentialsFlow
     // UI state
-    private val _uiState = MutableStateFlow(getFreshState())
-    val uiState: StateFlow<SurveyReportUIState> = _uiState.asStateFlow()
+    private val _uiState = surveyReportRepository.mutableSurveyState
+    val uiState: StateFlow<SurveyReport> = _uiState.asStateFlow()
     //Toast emitter
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage = _toastMessage.asSharedFlow()
-    //Init code
-    private fun getFreshState(): SurveyReportUIState {
-        return SurveyReportUIState() //Completely fresh form.
-    }
     //Hooks
     fun logOut() {
         viewModelScope.launch {
@@ -208,7 +208,7 @@ class SurveyReportViewModel (
                 _toastMessage.emit("Unable to submit form")
             } else {
                 _toastMessage.emit("Submission successful (ID: $surveyRequestID)")
-                _uiState.update { _ -> getFreshState()}
+                surveyReportRepository.resetSurvey()
             }
         }
     }
