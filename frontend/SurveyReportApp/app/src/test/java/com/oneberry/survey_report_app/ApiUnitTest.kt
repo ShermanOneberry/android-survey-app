@@ -1,7 +1,7 @@
 package com.oneberry.survey_report_app
 
+import com.oneberry.survey_report_app.data.SurveyReport
 import com.oneberry.survey_report_app.network.PocketBaseRepository
-import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportUIState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -13,7 +13,6 @@ import java.io.File
 import java.nio.file.Paths
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class ApiUnitTest {
     @Test
     fun wrapper_canGetBearerToken() = runTest {
@@ -38,8 +37,7 @@ class ApiUnitTest {
                 "resources", "test_image.jpg").toUri()
         val testImage = File(testImageJavaURI)
 
-        val survey = SurveyReportUIState(
-            reportingTeam = "dummy",
+        val survey = SurveyReport(
             reasonImage = testImage
             )
         val surveyRequestID = "b7z7sachnw3uqlg" //TODO: Replace this with auto generation
