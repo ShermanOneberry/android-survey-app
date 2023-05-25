@@ -47,6 +47,9 @@ class PreviewViewModel (
     //Toast emitter
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage = _toastMessage.asSharedFlow()
+    //Navigation
+    private val _navRequest = MutableSharedFlow<PreviewNavRequest>()
+    val navRequest = _navRequest.asSharedFlow()
     //Hooks
     //TODO: Add code here
     fun triggerSubmission() {
@@ -87,7 +90,7 @@ class PreviewViewModel (
             } else {
                 _toastMessage.emit("Submission successful (ID: $surveyRequestID)")
                 surveyReportRepository.resetSurvey()
-                //TODO: Trigger navigation back to form
+                _navRequest.emit(PreviewNavRequest.Back)
             }
         }
     }

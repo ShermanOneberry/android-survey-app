@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.oneberry.survey_report_app.ui.screens.login_screen.LoginScreen
+import com.oneberry.survey_report_app.ui.screens.preview_screen.PreviewScreen
 import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportScreen
 
 @Composable
@@ -18,9 +19,10 @@ fun NavGraph(navController: NavHostController, contentPadding: PaddingValues) {
     ) {
         addFormScreen(navController, this, contentPadding)
         addLoginScreen(navController, this, contentPadding)
-        //addPreviewScreen(navController, this)
+        addPreviewScreen(navController, this, contentPadding)
     }
 }
+
 private fun addFormScreen(
     navController: NavHostController,
     navGraphBuilder: NavGraphBuilder,
@@ -32,14 +34,11 @@ private fun addFormScreen(
                 navController.navigate(NavRoute.Login.path)
             },
             navigateToPreview = {
-                TODO()
+                navController.navigate(NavRoute.Preview.path)
             },
             contentPadding = contentPadding
         )
     }
-}
-private fun popUpToForm(navController: NavHostController) {
-    navController.popBackStack(NavRoute.Form.path, inclusive = false)
 }
 
 private fun addLoginScreen(
@@ -50,7 +49,20 @@ private fun addLoginScreen(
     navGraphBuilder.composable(route = NavRoute.Login.path) {
         LoginScreen(
             popBackStack = { navController.popBackStack() },
-            popUpToForm = { popUpToForm(navController) },
+            contentPadding = contentPadding,
+        )
+    }
+}
+
+
+fun addPreviewScreen(
+    navController: NavHostController,
+    navGraphBuilder: NavGraphBuilder,
+    contentPadding: PaddingValues,
+) {
+    navGraphBuilder.composable(route = NavRoute.Preview.path) {
+        PreviewScreen(
+            popBackStack = { navController.popBackStack() },
             contentPadding = contentPadding,
         )
     }

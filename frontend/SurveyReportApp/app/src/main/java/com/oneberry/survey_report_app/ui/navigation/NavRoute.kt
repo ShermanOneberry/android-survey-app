@@ -1,6 +1,7 @@
 package com.oneberry.survey_report_app.ui.navigation
 
 sealed class NavRoute(val path: String) {
+    //Based on: https://vtsen.hashnode.dev/simple-jetpack-compose-navigation-example
 
     object Login: NavRoute("login") {
     }

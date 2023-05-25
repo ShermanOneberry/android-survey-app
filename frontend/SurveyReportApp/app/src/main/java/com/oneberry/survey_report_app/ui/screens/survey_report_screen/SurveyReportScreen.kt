@@ -2,7 +2,6 @@ package com.oneberry.survey_report_app.ui.screens.survey_report_screen
 
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -62,7 +61,7 @@ fun SurveyReportScreen(
     navigateToPreview: () -> Unit,
     contentPadding: PaddingValues,
 ) {
-    val surveyReportUiState by surveyReportViewModel.uiState.collectAsState()
+    val surveyReportUiState by surveyReportViewModel.surveyState.collectAsState()
     val isFeasible = surveyReportUiState.isFeasible
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val context = LocalContext.current
@@ -75,6 +74,23 @@ fun SurveyReportScreen(
                     message,
                     Toast.LENGTH_SHORT,
                 ).show()
+            }
+    }
+    LaunchedEffect(Unit) {//TODO: Check if this is the correct method
+        surveyReportViewModel
+            .navRequest
+            .collect { request ->
+                when(request) {
+                    SurveyReportNavRequest.Login -> {
+                        navigateToLogin()
+                    }
+                    SurveyReportNavRequest.Preview -> {
+                        navigateToPreview()
+                    }
+                    is SurveyReportNavRequest.ReLogin -> {
+                        //TODO
+                    }
+                }
             }
     }
     Column(
@@ -307,12 +323,11 @@ fun SurveyReportScreen(
         }
         Divider()
         Button(onClick = {
-            Log.d("ButtonEvent", "This should not happen quickly")
-            surveyReportViewModel.triggerSubmission()
+            surveyReportViewModel.triggerPreview()
         },
             enabled = true
         ) {
-            Text(text = "Submit")
+            Text(text = "Preview")
         }
     }
 }

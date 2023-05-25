@@ -34,8 +34,7 @@ import com.oneberry.survey_report_app.R
 fun LoginScreen(
     loginViewModel: LoginViewModel =
         viewModel(factory = LoginViewModel.Factory),
-    popBackStack: () -> Boolean, //TODO: Should I remove this? Or try to integrate this into top app bar
-    popUpToForm: () -> Unit,
+    popBackStack: () -> Boolean,
     contentPadding: PaddingValues,
 ) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
@@ -57,7 +56,7 @@ fun LoginScreen(
             .uiState
             .collect { state ->
                 if (state.successfulLogin) {
-                    popUpToForm()
+                    popBackStack()
                 }
             }
     }
