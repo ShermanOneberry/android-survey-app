@@ -59,6 +59,14 @@ class SurveyReportViewModel (
         return SurveyReportUIState() //Completely fresh form.
     }
     //Hooks
+    fun logOut() {
+        viewModelScope.launch {
+            userCredentialsRepository.saveToPreferencesStore(
+                UserCredentials()
+            )
+        }
+    }
+
     fun updateBatchNum(newNum: String) {
         if (newNum.contains("\n")) return
         _uiState.update { currentState ->

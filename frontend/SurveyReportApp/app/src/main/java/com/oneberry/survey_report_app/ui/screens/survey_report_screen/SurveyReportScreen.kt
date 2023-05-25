@@ -99,6 +99,9 @@ fun SurveyReportScreen(
                 Button(onClick = { navigateToLogin() }) {
                     Text("Change User")
                 }
+                Button(onClick = { surveyReportViewModel.logOut()}) {
+                    Text("Logout")
+                }
             }
         } else {
             Button(onClick = { navigateToLogin() }) {
