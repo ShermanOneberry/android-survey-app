@@ -18,11 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
-import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportNavRequest
 
 @Composable
 fun PreviewScreen(
     previewViewModel: PreviewViewModel = viewModel(factory = PreviewViewModel.Factory),
+    navigateToLogin: (String) -> Unit,
     popBackStack: () -> Boolean,
     contentPadding: PaddingValues,
 ) {
@@ -39,7 +39,7 @@ fun PreviewScreen(
                 ).show()
             }
     }
-    LaunchedEffect(Unit) {//TODO: Check if this is the correct method
+    LaunchedEffect(Unit) {
         previewViewModel
             .navRequest
             .collect { request ->
@@ -48,7 +48,7 @@ fun PreviewScreen(
                         popBackStack()
                     }
                     is PreviewNavRequest.ReLogin -> {
-                        //TODO
+                        navigateToLogin(request.username)
                     }
                 }
             }

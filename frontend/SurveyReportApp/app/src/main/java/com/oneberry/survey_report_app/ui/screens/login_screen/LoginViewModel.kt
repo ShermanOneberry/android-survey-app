@@ -2,6 +2,7 @@ package com.oneberry.survey_report_app.ui.screens.login_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -9,6 +10,7 @@ import com.oneberry.survey_report_app.SurveyApplication
 import com.oneberry.survey_report_app.data.UserCredentials
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.PocketBaseRepository
+import com.oneberry.survey_report_app.ui.navigation.NavRoute
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel (
+    private val initialUsername: String,
     private val userCredentialsRepository: UserCredentialsRepository,
     private val backendAPI: PocketBaseRepository
 ): ViewModel() {
@@ -29,7 +32,12 @@ class LoginViewModel (
                     app.userCredentialsRepository
                 val backendAPI =
                     app.backendAPI
+                val initialUsername:String =
+                    createSavedStateHandle()[NavRoute.Login.username]
+                        ?: ""
+
                 LoginViewModel(
+                    initialUsername = initialUsername,
                     userCredentialsRepository = userCredentialsRepository,
                     backendAPI = backendAPI,
                 )
@@ -37,7 +45,9 @@ class LoginViewModel (
         }
     }
     // UI state
-    private val _uiState = MutableStateFlow(LoginUIState()) //TODO: Initialize username from navigation parameter
+    private val _uiState = MutableStateFlow(
+        LoginUIState(username = initialUsername)
+    )
     val uiState: StateFlow<LoginUIState> = _uiState.asStateFlow()
     //Toast emitter
     private val _toastMessage = MutableSharedFlow<String>()

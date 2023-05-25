@@ -57,7 +57,7 @@ import java.io.File
 fun SurveyReportScreen(
     surveyReportViewModel: SurveyReportViewModel =
         viewModel(factory = SurveyReportViewModel.Factory),
-    navigateToLogin: () -> Unit,
+    navigateToLogin: (String) -> Unit,
     navigateToPreview: () -> Unit,
     contentPadding: PaddingValues,
 ) {
@@ -76,19 +76,19 @@ fun SurveyReportScreen(
                 ).show()
             }
     }
-    LaunchedEffect(Unit) {//TODO: Check if this is the correct method
+    LaunchedEffect(Unit) {
         surveyReportViewModel
             .navRequest
             .collect { request ->
                 when(request) {
                     SurveyReportNavRequest.Login -> {
-                        navigateToLogin()
+                        navigateToLogin("")
                     }
                     SurveyReportNavRequest.Preview -> {
                         navigateToPreview()
                     }
                     is SurveyReportNavRequest.ReLogin -> {
-                        //TODO
+                        navigateToLogin(request.username)
                     }
                 }
             }
@@ -114,7 +114,7 @@ fun SurveyReportScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(text = displayUser)
-                Button(onClick = { navigateToLogin() }) {
+                Button(onClick = { navigateToLogin("") }) {
                     Text("Change User")
                 }
                 Button(onClick = { surveyReportViewModel.logOut()}) {
@@ -122,7 +122,7 @@ fun SurveyReportScreen(
                 }
             }
         } else {
-            Button(onClick = { navigateToLogin() }) {
+            Button(onClick = { navigateToLogin("") }) {
                 Text("Login")
             }
         }

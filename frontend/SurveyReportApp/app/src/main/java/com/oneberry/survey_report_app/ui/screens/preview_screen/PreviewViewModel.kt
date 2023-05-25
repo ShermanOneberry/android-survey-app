@@ -62,7 +62,7 @@ class PreviewViewModel (
                 _toastMessage.emit("Current form is not valid")
                 return@launch
             }
-            val credentials = credentialFlow.first() //TODO: Check this with multiple user changes
+            val credentials = credentialFlow.first()
             if (credentials.username == null) {
                 _toastMessage.emit("You need to login to submit")
                 return@launch
@@ -75,7 +75,9 @@ class PreviewViewModel (
             }
             if (nonNullCredentials.isNotExpired(LocalDateTime.now(),false)) {
                 _toastMessage.emit("You need to login again, your session has expired.")
-                //TODO: Trigger relogin dialog
+                _navRequest.emit(
+                    PreviewNavRequest.ReLogin(credentials.username)
+                )
                 return@launch
             }
             val surveyRequestID = "b7z7sachnw3uqlg"

@@ -179,7 +179,7 @@ class SurveyReportViewModel (
                 emitToast("Current form is not valid")
                 return@launch
             }
-            val credentials = credentialFlow.first() //TODO: Check this with multiple user changes
+            val credentials = credentialFlow.first()
             if (credentials.username == null) {
                 emitToast("You need to login to submit")
                 return@launch
@@ -192,7 +192,9 @@ class SurveyReportViewModel (
             }
             if (nonNullCredentials.isNotExpired(LocalDateTime.now(),true)) {
                 emitToast("You need to login again, your session has expired.")
-                //TODO: Trigger relogin dialog
+                _navRequest.emit(
+                    SurveyReportNavRequest.ReLogin(credentials.username)
+                )
                 return@launch
             }
             _navRequest.emit(SurveyReportNavRequest.Preview)
