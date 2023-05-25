@@ -3,8 +3,8 @@ package com.oneberry.survey_report_app.network
 import android.util.Log
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
+import com.oneberry.survey_report_app.data.SurveyReport
 import com.oneberry.survey_report_app.test_util.isUnitTest
-import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportUIState
 import io.goodforgod.gson.configuration.GsonFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -49,7 +49,7 @@ class PocketBaseRepository() {
         bearerToken: String,
         surveyId: String,
         userId: String,
-        surveyData: SurveyReportUIState,
+        surveyData: SurveyReport,
     ) : String? {
         return withContext(Dispatchers.IO) {
             if (!surveyData.isFeasible) return@withContext null
