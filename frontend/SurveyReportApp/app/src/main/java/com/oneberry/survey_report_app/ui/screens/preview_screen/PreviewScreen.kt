@@ -62,6 +62,9 @@ fun PreviewScreen(
                     PreviewNavRequest.Back -> {
                         popBackStack()
                     }
+                    PreviewNavRequest.Login -> {
+                        navigateToLogin("")
+                    }
                     is PreviewNavRequest.ReLogin -> {
                         navigateToLogin(request.username)
                     }

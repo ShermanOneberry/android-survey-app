@@ -51,26 +51,28 @@ class PreviewViewModel (
     private val _navRequest = MutableSharedFlow<PreviewNavRequest>()
     val navRequest = _navRequest.asSharedFlow()
     //Hooks
-    //TODO: Add code here
     fun triggerSubmission() {
-        //TODO: Adjust the toast messages to be more concerned with errors
-        // suddenly popping up when they shouldn't
         viewModelScope.launch {
             val finalFormData =
                 surveyState.value.copy(submissionTime = LocalDateTime.now())
             if (!finalFormData.overallSurveyValid()) {
-                _toastMessage.emit("Current form is not valid")
+                _toastMessage.emit("Error: Current form is not valid")
+                _navRequest.emit(PreviewNavRequest.Back)
                 return@launch
             }
             val credentials = credentialFlow.first()
             if (credentials.username == null) {
-                _toastMessage.emit("You need to login to submit")
+                _toastMessage.emit("Error: Login credentials missing")
+                _navRequest.emit(PreviewNavRequest.Login)
                 return@launch
             }
             val nonNullCredentials =
                 credentials.tryGetNotNullCredentials()
             if (nonNullCredentials == null) {
-                _toastMessage.emit("Please Login Again")
+                _toastMessage.emit("Error: Login credentials missing")
+                _navRequest.emit(
+                    PreviewNavRequest.ReLogin(credentials.username)
+                )
                 return@launch
             }
             if (nonNullCredentials.isNotExpired(LocalDateTime.now(),false)) {
