@@ -34,7 +34,9 @@ private fun addFormScreen(
         SurveyReportScreen(
             navigateToLogin = { initialUsername:String ->
                 navController.navigate(
-                    NavRoute.Login.withArgs(initialUsername)
+                    NavRoute.Login
+                        .forArgs(NavRoute.Login.username)
+                        .withArgs(initialUsername)
                 )
             },
             navigateToPreview = {
@@ -57,7 +59,6 @@ private fun addLoginScreen(
         arguments = listOf(
             navArgument(NavRoute.Login.username) {
                 type = NavType.StringType
-                nullable = false
             }
         )
     ) {
@@ -78,7 +79,9 @@ fun addPreviewScreen(
         PreviewScreen(
             navigateToLogin = { initialUsername:String ->
                 navController.navigate(
-                    NavRoute.Login.withArgs(initialUsername)
+                    NavRoute.Login
+                        .forArgs(NavRoute.Login.username)
+                        .withArgs(initialUsername)
                 )
             },
             popBackStack = { navController.popBackStack() },

@@ -2,6 +2,7 @@ package com.oneberry.survey_report_app.ui.navigation
 
 sealed class NavRoute(val path: String) {
     //Based on: https://vtsen.hashnode.dev/simple-jetpack-compose-navigation-example
+    private var argNames: Array<out String> = arrayOf()
 
     object Login: NavRoute("login") {
         val username = "username"
@@ -12,11 +13,15 @@ sealed class NavRoute(val path: String) {
     object Preview: NavRoute("preview")
 
     // build navigation path (for screen navigation)
+    fun forArgs(vararg args: String):NavRoute {
+        argNames = args
+        return this
+    }
     fun withArgs(vararg args: String): String {
         return buildString {
             append(path)
-            args.forEach{ arg ->
-                append("/$arg")
+            argNames.zip(args).forEach{ (argName, argValue) ->
+                append("/?$argName=$argValue")
             }
         }
     }
@@ -26,7 +31,7 @@ sealed class NavRoute(val path: String) {
         return buildString {
             append(path)
             args.forEach{ arg ->
-                append("/{$arg}")
+                append("/?$arg={$arg}")
             }
         }
     }
