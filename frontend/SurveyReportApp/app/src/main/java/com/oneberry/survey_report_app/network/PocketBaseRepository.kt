@@ -47,7 +47,6 @@ class PocketBaseRepository() {
 
     suspend fun uploadForm(
         bearerToken: String,
-        surveyId: String,
         userId: String,
         surveyData: SurveyReport,
     ) : String? {
@@ -55,8 +54,10 @@ class PocketBaseRepository() {
             if (!surveyData.isFeasible) return@withContext null
             //ID part //TODO: Replace this with auto generation from batch num and id,
             //                either logically or through query
-            val surveyIdPart = surveyId
-                .toRequestBody("text/plain; charset=utf-8".toMediaTypeOrNull())
+            val surveyIdPart =
+                "${surveyData.batchNum.trim()}_${surveyData.intraBatchId.trim()}"
+                    .padEnd(15,'_')
+                    .toRequestBody("text/plain; charset=utf-8".toMediaTypeOrNull())
 
             val userIdPart = userId
                 .toRequestBody("text/plain; charset=utf-8".toMediaTypeOrNull())

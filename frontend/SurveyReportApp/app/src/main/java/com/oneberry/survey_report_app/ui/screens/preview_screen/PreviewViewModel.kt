@@ -80,17 +80,15 @@ class PreviewViewModel (
                 )
                 return@launch
             }
-            val surveyRequestID = "b7z7sachnw3uqlg"
             val surveyResponseID = backendAPI.uploadForm(
                 nonNullCredentials.token,
-                surveyRequestID,
                 nonNullCredentials.id,
                 finalFormData
             )
             if (surveyResponseID == null) {
                 _toastMessage.emit("Unable to submit form")
             } else {
-                _toastMessage.emit("Submission successful (ID: $surveyRequestID)")
+                _toastMessage.emit("Submission successful")
                 surveyReportRepository.resetSurvey()
                 _navRequest.emit(PreviewNavRequest.Back)
             }

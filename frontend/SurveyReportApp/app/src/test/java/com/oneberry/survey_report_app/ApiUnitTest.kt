@@ -40,7 +40,6 @@ class ApiUnitTest {
         val survey = SurveyReport(
             reasonImage = testImage
             )
-        val surveyRequestID = "b7z7sachnw3uqlg" //TODO: Replace this with auto generation
 
         val tokenApiResult = wrapper
             .getApiToken("dummy", "password1234")
@@ -49,7 +48,6 @@ class ApiUnitTest {
             println(tokenApiResult.id)
             val surveyResultID = wrapper.uploadForm(
                 tokenApiResult.token,
-                surveyRequestID,
                 tokenApiResult.id,
                 survey
             )
