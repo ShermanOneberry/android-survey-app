@@ -182,12 +182,16 @@ class SurveyReportViewModel (
             val credentials = credentialFlow.first()
             if (credentials.username == null) {
                 emitToast("You need to login to submit")
+                _navRequest.emit(SurveyReportNavRequest.Login)
                 return@launch
             }
             val nonNullCredentials =
                 credentials.tryGetNotNullCredentials()
             if (nonNullCredentials == null) {
                 emitToast("Please Login Again")
+                _navRequest.emit(
+                    SurveyReportNavRequest.ReLogin(credentials.username)
+                )
                 return@launch
             }
             if (nonNullCredentials.isNotExpired(LocalDateTime.now(),true)) {
