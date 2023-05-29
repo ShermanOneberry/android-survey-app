@@ -23,6 +23,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -498,7 +499,10 @@ fun ImagePicker(imageCategory: String, image: File?, updateImage: (File?) -> Uni
     Column( //TODO: Make text here red when nothing is selected
         modifier = Modifier
             .padding(mediumPadding),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(
+            space = mediumPadding,
+            alignment = Alignment.CenterVertically
+        ),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Text(imageCategory)
@@ -513,7 +517,7 @@ fun ImagePicker(imageCategory: String, image: File?, updateImage: (File?) -> Uni
                     modifier = Modifier.size(400.dp))
             }
             Text(image.name)
-        }
+        } ?: Text("You must have an image", color= MaterialTheme.colorScheme.error)
         Button(onClick = {
             launcher.launch("image/*")
         }) {

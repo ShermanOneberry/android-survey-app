@@ -52,8 +52,6 @@ class PocketBaseRepository() {
     ) : String? {
         return withContext(Dispatchers.IO) {
             if (!surveyData.isFeasible) return@withContext null
-            //ID part //TODO: Replace this with auto generation from batch num and id,
-            //                either logically or through query
             val surveyIdPart =
                 "${surveyData.batchNum.trim()}_${surveyData.intraBatchId.trim()}"
                     .padEnd(15,'_')
