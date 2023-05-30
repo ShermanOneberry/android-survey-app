@@ -99,14 +99,13 @@ fun PreviewScreen(
         ImageDisplay("Survey Image", report.reasonImage)
         Divider()
         val nearbyLocationText =
-            if (report.nearbyDescription.isBlank())
-                report.nearbyDescription.trim()
-            else ""
+            if (report.nearbyDescription.isBlank()) ""
+            else " " + report.nearbyDescription.trim()
         val distanceNumber =
             report.locationDistance.substring(0, report.locationDistance.length - 1).trim()
-        val generalLocationDescription
-        = "${report.blockLocation.trim()} ${report.streetLocation.trim()}" +
-                "${nearbyLocationText}. Distance: $distanceNumber meters away"
+        val generalLocationDescription =
+            "${report.blockLocation.trim()} ${report.streetLocation.trim()}" +
+            "${nearbyLocationText}. Distance: $distanceNumber meters away"
         if (report.isFeasible) {
             Text("Camera count: ${report.cameraCount}; Box count: ${report.boxCount}")
             val locationText = when(report.locationType) {
