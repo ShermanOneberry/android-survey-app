@@ -1,6 +1,16 @@
 # App Backend
 
-This is a collection of code that is meant to live in the backend
+This is a collection of code that is meant to live in the backend.
+
+- `pocketbase_direct` just contains a pocketbase installation.
+  It's best used when we can use Let's Encrypt for Certificate signing.
+
+  TODO: Consider replacing this with a link to the Pocketbase project
+
+- `pocketbase_docker_windows` contains a dockerized version of pocketbase, with reverse proxy. 
+  This is best used for when we cannot use Let's Encrypt. 
+
+- `pocketbase_scripts` contains a node project with scripts for loading incoming Excel data, and generating outgoing Excel reports.
 
 ## Installation
 
