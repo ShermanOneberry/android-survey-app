@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -21,9 +22,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -39,6 +43,7 @@ fun LoginScreen(
 ) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val uiState = loginViewModel.uiState.collectAsState().value
     LaunchedEffect(Unit) {
         loginViewModel
@@ -51,7 +56,7 @@ fun LoginScreen(
                 ).show()
             }
     }
-    LaunchedEffect(Unit) {//TODO: Check if this is the correct method
+    LaunchedEffect(Unit) {
         loginViewModel
             .uiState
             .collect { state ->
@@ -82,15 +87,35 @@ fun LoginScreen(
             label = { Text(text = "Username") },
             value = uiState.username,
             enabled = uiState.uiEnabled,
-            onValueChange = { loginViewModel.updateUsername(it) })
+            onValueChange = { loginViewModel.updateUsername(it) },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
+        )
 
         TextField(
             label = { Text(text = "Password") },
             value = uiState.password,
             enabled = uiState.uiEnabled,
+            onValueChange = { loginViewModel.updatePassword(it) },
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            onValueChange = { loginViewModel.updatePassword(it) })
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    loginViewModel.attemptLogin()
+                }
+            ),
+        )
+
+
 
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(

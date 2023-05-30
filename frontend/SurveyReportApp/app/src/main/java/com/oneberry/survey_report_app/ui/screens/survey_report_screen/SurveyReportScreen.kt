@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +47,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
@@ -134,7 +136,6 @@ fun SurveyReportScreen(
             fieldTitle = "Batch number",
             fieldInput = surveyReportUiState.batchNum,
             isFieldValid = surveyReportUiState.batchNumValid(),
-            isFinalInput = false,
             onInputChange = { surveyReportViewModel.updateBatchNum(it) },
             errorMessage = surveyReportUiState.batchNumError(),
         )
@@ -142,7 +143,6 @@ fun SurveyReportScreen(
             fieldTitle = "Survey number for batch",
             fieldInput = surveyReportUiState.intraBatchId,
             isFieldValid = surveyReportUiState.intraBatchIdValid(),
-            isFinalInput = false,
             onInputChange = { surveyReportViewModel.updateIntraBatchId(it) },
             errorMessage = surveyReportUiState.intraBatchIdError(),
         )
@@ -175,7 +175,6 @@ fun SurveyReportScreen(
                 fieldTitle = "Distance to Unit",
                 fieldInput = surveyReportUiState.locationDistance,
                 isFieldValid = surveyReportUiState.locationDistanceValid(),
-                isFinalInput = false,
                 onInputChange = { surveyReportViewModel.updateLocationDistance(it) },
                 errorMessage = surveyReportUiState.locationDistanceError(),
             )
@@ -183,7 +182,6 @@ fun SurveyReportScreen(
                 fieldTitle = "Camera Count",
                 fieldInput = surveyReportUiState.cameraCount,
                 isFieldValid = surveyReportUiState.cameraCountValid(),
-                isFinalInput = false,
                 onInputChange = { surveyReportViewModel.updateCameraCount(it) },
                 errorMessage = surveyReportUiState.cameraCountError()
             )
@@ -191,7 +189,6 @@ fun SurveyReportScreen(
                 fieldTitle = "Box Count",
                 fieldInput = surveyReportUiState.boxCount,
                 isFieldValid = surveyReportUiState.boxCountValid(),
-                isFinalInput = false,
                 onInputChange = { surveyReportViewModel.updateBoxCount(it) },
                 errorMessage = surveyReportUiState.boxCountError()
             )
@@ -207,7 +204,6 @@ fun SurveyReportScreen(
                         fieldTitle = "Corridor Level",
                         fieldInput = surveyReportUiState.corridorLevel,
                         isFieldValid = surveyReportUiState.corridorLevelValid(),
-                        isFinalInput = false,
                         onInputChange = { surveyReportViewModel.updateCorridorLevel(it) },
                         errorMessage = surveyReportUiState.corridorLevelError()
                     )
@@ -218,7 +214,6 @@ fun SurveyReportScreen(
                         fieldTitle = "Lower Level",
                         fieldInput = surveyReportUiState.stairwayLowerLevel,
                         isFieldValid = surveyReportUiState.stairwayLowerLevelValid(),
-                        isFinalInput = false,
                         onInputChange = { surveyReportViewModel.updateStairwayLowerLevel(it) },
                         errorMessage = surveyReportUiState.stairwayLowerLevelError()
                     )
@@ -244,7 +239,6 @@ fun SurveyReportScreen(
                         fieldTitle = "Carpark Level",
                         fieldInput = surveyReportUiState.carparkLevel,
                         isFieldValid = surveyReportUiState.carparkLevelValid(),
-                        isFinalInput = false,
                         onInputChange = { surveyReportViewModel.updateCarparkLevel(it) },
                         errorMessage = surveyReportUiState.carparkLevelError()
                     )
@@ -258,7 +252,6 @@ fun SurveyReportScreen(
                 fieldTitle = "Block number",
                 fieldInput = surveyReportUiState.blockLocation,
                 isFieldValid = surveyReportUiState.blockLocationValid(),
-                isFinalInput = false,
                 onInputChange = { surveyReportViewModel.updateBlockLocation(it) },
                 errorMessage = surveyReportUiState.blockLocationError()
             )
@@ -266,7 +259,6 @@ fun SurveyReportScreen(
                 fieldTitle = "Street location",
                 fieldInput = surveyReportUiState.streetLocation,
                 isFieldValid = surveyReportUiState.streetLocationValid(),
-                isFinalInput = false,
                 onInputChange = { surveyReportViewModel.updateStreetLocation(it) },
                 errorMessage = surveyReportUiState.streetLocationError()
             )
@@ -274,19 +266,14 @@ fun SurveyReportScreen(
                 fieldTitle = "Description of what is nearby (optional)",
                 fieldInput = surveyReportUiState.nearbyDescription,
                 isFieldValid = true,
-                isFinalInput = false,
                 onInputChange = {surveyReportViewModel.updateNearbyDescription(it)},
-                errorMessage = null //TODO: Maybe add suggested input here?
+                errorMessage = "Eg: 'near lift lobby A'" //Simple hint
             )
-            //TODO: Add nearby clarification info and context sensitive hint system
-            //      Eg: 'Corridor' is "near Lift Lobby 3A", while 'Ground' is "on grass patch"
-            //      Also add preview system for how location description will be generated on the server
         } else {
             TextInputTemplate(
                 fieldTitle = "Explanation of Infeasibility/Alternatives",
                 fieldInput = surveyReportUiState.nonFeasibleExplanation,
                 isFieldValid = surveyReportUiState.nonFeasibleExplanationValid(),
-                isFinalInput = false,
                 onInputChange = {surveyReportViewModel.updateNonFeasibleExplanation(it)},
                 errorMessage = surveyReportUiState.nonFeasibleExplanationError()
             )
@@ -308,13 +295,14 @@ fun SurveyReportScreen(
             )
         }
         if (surveyReportUiState.hasAdditionalNotes) {
-            TextInputTemplate(//TODO: Get this to handle multi lines
+            TextInputTemplate(
                 fieldTitle = "Additional Notes",
                 fieldInput = surveyReportUiState.techniciansNotes,
                 isFieldValid = surveyReportUiState.techniciansNotesValid(),
-                isFinalInput = false,
+                isFinalInput = true,
                 onInputChange = { surveyReportViewModel.updateTechniciansNotes(it) },
-                errorMessage = surveyReportUiState.techniciansNotesError()
+                errorMessage = surveyReportUiState.techniciansNotesError(),
+                isMultiLine = true
             )
             ImagePicker(
                 "Accompanying Image",
@@ -449,16 +437,18 @@ fun TextInputTemplate(
     isFieldValid: Boolean,
     errorMessage: String?,
     onInputChange: (String) -> Unit,
-    isFinalInput: Boolean //TODO: Remove this I think
+    isFinalInput: Boolean = false,
+    isMultiLine: Boolean = false,
 ) {
-    //TODO: Should this focusManger be called here or from the main screen composable?
-    //TODO: Should I even bother with focus management? Take out if this causes too many bugs
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = fieldInput,
-        singleLine = true,
+        singleLine = !isMultiLine,
         shape = shapes.large,
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            if (isMultiLine)
+                Modifier.fillMaxWidth().heightIn(1.dp, Dp.Infinity)
+            else Modifier.fillMaxWidth(),
         //colors = TextFieldDefaults.textFieldColors(containerColor = colorScheme.surface),
         onValueChange = onInputChange,
         label = {Text(fieldTitle)},
@@ -468,7 +458,7 @@ fun TextInputTemplate(
             imeAction = if (isFinalInput) ImeAction.Done else ImeAction.Next
         ),
         keyboardActions = KeyboardActions(
-            onDone = { },
+            onDone = { focusManager.clearFocus() },
             onNext = {
                 focusManager.moveFocus(FocusDirection.Down)
             }
@@ -494,9 +484,9 @@ fun ImagePicker(imageCategory: String, image: File?, updateImage: (File?) -> Uni
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
-        onResult = {updateImage(if (it != null) getFile(context,it) else null)}, //TODO: Check what happens if we don't declare an image
+        onResult = {updateImage(if (it != null) getFile(context,it) else null)},
     )
-    Column( //TODO: Make text here red when nothing is selected
+    Column(
         modifier = Modifier
             .padding(mediumPadding),
         verticalArrangement = Arrangement.spacedBy(
