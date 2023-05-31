@@ -24,7 +24,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 class SurveyReportViewModel (
     private val userCredentialsRepository: UserCredentialsRepository,
@@ -86,6 +88,16 @@ class SurveyReportViewModel (
         if (newNum.contains("\n")) return
         _surveyState.update { currentState ->
             currentState.copy(intraBatchId = newNum)
+        }
+    }
+    fun updateSurveyDate(newDate: LocalDate) {
+        _surveyState.update { currentState ->
+            currentState.copy(surveyDate = newDate)
+        }
+    }
+    fun updateSurveyTime(newTime: LocalTime) {
+        _surveyState.update { currentState ->
+            currentState.copy(surveyTime = newTime)
         }
     }
     fun updateIsFeasible(newOK: Boolean) {
@@ -185,7 +197,7 @@ class SurveyReportViewModel (
     }
     fun triggerPreview() {
         viewModelScope.launch {
-            val finalFormData =  surveyState.value.copy(submissionTime = LocalDateTime.now())
+            val finalFormData = surveyState.value
             if (!finalFormData.overallSurveyValid()) {
                 emitToast("Current form is not valid")
                 return@launch

@@ -53,8 +53,7 @@ class PreviewViewModel (
     //Hooks
     fun triggerSubmission() {
         viewModelScope.launch {
-            val finalFormData =
-                surveyState.value.copy(submissionTime = LocalDateTime.now())
+            val finalFormData = surveyState.value
             if (!finalFormData.overallSurveyValid()) {
                 _toastMessage.emit("Error: Current form is not valid")
                 _navRequest.emit(PreviewNavRequest.Back)

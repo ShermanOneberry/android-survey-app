@@ -1,7 +1,8 @@
 package com.oneberry.survey_report_app.data
 
 import java.io.File
-import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.LocalTime
 
 
 data class SurveyReport(
@@ -10,7 +11,8 @@ data class SurveyReport(
     @Transient
     val intraBatchId: String = "1",
     //Metadata about report
-    val submissionTime: LocalDateTime? = null,
+    val surveyDate: LocalDate? = null,
+    val surveyTime: LocalTime? = null,
 
     val isFeasible: Boolean = true,
     @Transient //Provide image separately, rather than serialize
@@ -138,7 +140,13 @@ data class SurveyReport(
         else "Cannot have empty notes"
     }
     fun overallSurveyValid(): Boolean { //Note: Update this along side actual fields
-        if (reasonImage == null) return false
+        if (
+            !batchNumValid() ||
+            !intraBatchIdValid() ||
+            surveyDate == null ||
+            surveyTime == null||
+            reasonImage == null
+        ) return false
 
         if (hasAdditionalNotes) {
             if (extraImage == null || !techniciansNotesValid()) {

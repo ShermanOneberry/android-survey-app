@@ -41,11 +41,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -55,7 +55,14 @@ import com.oneberry.survey_report_app.R
 import com.oneberry.survey_report_app.data.GroundType
 import com.oneberry.survey_report_app.data.LocationType
 import com.oneberry.survey_report_app.util.getFile
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun SurveyReportScreen(
@@ -178,6 +185,14 @@ fun SurveyReportScreen(
             errorMessage = surveyReportUiState.intraBatchIdError(),
         )
 
+        Divider()
+        Text("Survey DateTime")
+        DateTimePicker(
+            surveyReportUiState.surveyDate,
+            { surveyReportViewModel.updateSurveyDate(it) },
+            surveyReportUiState.surveyTime,
+            { surveyReportViewModel.updateSurveyTime(it) }
+        )
         Divider()
 
         Row(
@@ -546,6 +561,95 @@ fun ImagePicker(imageCategory: String, image: File?, updateImage: (File?) -> Uni
         }) {
             Text(text = if (image == null) "Pick image"
             else "Pick different Image")
+        }
+    }
+}
+@Preview
+@Composable
+fun DateTimePickerPreview(){
+    var localDate by remember {
+        mutableStateOf<LocalDate?>(null)
+    }
+    var localTime by remember {
+        mutableStateOf<LocalTime?>(null)
+    }
+    val mediumPadding = dimensionResource(R.dimen.padding_medium)
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(mediumPadding), //Padding
+        verticalArrangement = Arrangement.spacedBy(
+            space = mediumPadding,
+            alignment = Alignment.CenterVertically
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("Survey DateTime")
+        DateTimePicker(
+            localDate,
+            { localDate = it },
+            localTime,
+            { localTime = it }
+        )
+    }
+}
+@Composable
+fun DateTimePicker(
+    localDate: LocalDate?,
+    updateDate: (LocalDate) -> Unit,
+    localTime: LocalTime?,
+    updateTime: (LocalTime) -> Unit,
+){
+    val dateDialogState = rememberMaterialDialogState()
+    MaterialDialog(
+        dialogState = dateDialogState,
+        buttons = {
+            positiveButton("Ok")
+            negativeButton("Cancel")
+        }
+    ) {
+        datepicker { updateDate(it) }
+    }
+    val timeDialogState = rememberMaterialDialogState()
+    MaterialDialog(
+        dialogState = timeDialogState,
+        buttons = {
+            positiveButton("Ok")
+            negativeButton("Cancel")
+        }
+    ) {
+        timepicker { updateTime(it) }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = localDate?.let{"Date: " + localDate.format(
+                DateTimeFormatter.ofPattern("d/M/yyyy")
+            )} ?: "Must have a Date",
+            color = if (localDate == null) MaterialTheme.colorScheme.error
+                    else Color.Unspecified
+        )
+        Button(onClick = { dateDialogState.show() }) {
+            Text("Set Date")
+        }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = localTime?.let {
+                "Time: ${localTime?.toString()} hrs"
+            }?: "Must have a Time",
+            color = if (localTime == null) MaterialTheme.colorScheme.error
+            else Color.Unspecified
+        )
+        Button(onClick = { timeDialogState.show() }) {
+            Text("Set Time")
         }
     }
 }
