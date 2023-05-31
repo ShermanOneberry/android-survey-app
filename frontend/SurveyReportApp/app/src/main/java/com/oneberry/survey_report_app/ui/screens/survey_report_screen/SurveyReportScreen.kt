@@ -65,6 +65,7 @@ fun SurveyReportScreen(
     contentPadding: PaddingValues,
 ) {
     val surveyReportUiState by surveyReportViewModel.surveyState.collectAsState()
+    val credentials by surveyReportViewModel.credentialLiveData.observeAsState()
     val isFeasible = surveyReportUiState.isFeasible
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val context = LocalContext.current
@@ -108,8 +109,7 @@ fun SurveyReportScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        val displayUser =
-            surveyReportViewModel.credentialLiveData.observeAsState().value?.username
+        val displayUser = credentials?.username
         if(displayUser != null) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -447,7 +447,9 @@ fun TextInputTemplate(
         shape = shapes.large,
         modifier =
             if (isMultiLine)
-                Modifier.fillMaxWidth().heightIn(1.dp, Dp.Infinity)
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(1.dp, Dp.Infinity)
             else Modifier.fillMaxWidth(),
         //colors = TextFieldDefaults.textFieldColors(containerColor = colorScheme.surface),
         onValueChange = onInputChange,
