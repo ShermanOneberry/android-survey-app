@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "load-db": "node load_db.js",
-    "generate-report": "node generate_report.js"
+    "load_db": "node load_db.js",
+    "generate_report": "node generate_report.js",
+    "sync_pocketbase_typescript": "npx pocketbase-typegen --db ../pocketbase_direct/pb_data/data.db --out pocketbase-types.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@siema-team/spreadsheets": "^1.0.202305051500",
     "axios": "^1.4.0",
     "dotenv": "^16.0.3",
-    "excel4node": "^1.8.2",
     "pocketbase": "^0.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "typescript": "^5.0.4"
   }
 }
