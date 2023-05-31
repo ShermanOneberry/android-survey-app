@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.AppBootRepository
 import com.oneberry.survey_report_app.data.UserCredentials
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.PocketBaseRepository
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
 class LoginViewModel (
     private val initialUsername: String,
     private val userCredentialsRepository: UserCredentialsRepository,
-    private val backendAPI: PocketBaseRepository
+    private val backendAPI: PocketBaseRepository,
+    private val appBootRepository: AppBootRepository,
 ): ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -32,6 +34,8 @@ class LoginViewModel (
                     app.userCredentialsRepository
                 val backendAPI =
                     app.backendAPI
+                val appBootRepository =
+                    app.appBootRepository
                 val initialUsername:String =
                     createSavedStateHandle()[NavRoute.Login.username]
                         ?: ""
@@ -40,6 +44,7 @@ class LoginViewModel (
                     initialUsername = initialUsername,
                     userCredentialsRepository = userCredentialsRepository,
                     backendAPI = backendAPI,
+                    appBootRepository = appBootRepository
                 )
             }
         }
@@ -52,7 +57,10 @@ class LoginViewModel (
     //Toast emitter
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage = _toastMessage.asSharedFlow()
-
+    //Conditional Startup logic
+    fun markConditionalStartupDone() {
+        appBootRepository.appHasLoaded.update { true }
+    }
     fun updateUsername(newUsername: String) {
         if (newUsername.contains("\n")) return
         _uiState.update { currentState ->

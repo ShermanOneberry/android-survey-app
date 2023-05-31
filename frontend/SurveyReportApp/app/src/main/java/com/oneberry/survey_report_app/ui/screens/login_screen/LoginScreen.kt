@@ -33,6 +33,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun LoginScreen(
@@ -128,5 +130,9 @@ fun LoginScreen(
                 Text(text = "Login")
             }
         }
+    }
+    LaunchedEffect(Unit) {
+        delay(1.seconds) //Wait for nav transition to be done
+        loginViewModel.markConditionalStartupDone()
     }
 }

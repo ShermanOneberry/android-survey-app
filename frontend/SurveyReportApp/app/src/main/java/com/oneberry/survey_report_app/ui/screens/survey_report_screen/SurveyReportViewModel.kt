@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.AppBootRepository
 import com.oneberry.survey_report_app.data.GroundType
 import com.oneberry.survey_report_app.data.LocationType
 import com.oneberry.survey_report_app.data.SurveyReport
@@ -28,6 +29,7 @@ import java.time.LocalDateTime
 class SurveyReportViewModel (
     private val userCredentialsRepository: UserCredentialsRepository,
     private val surveyReportRepository: SurveyReportRepository,
+    private val appBootRepository: AppBootRepository,
 ): ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -37,9 +39,12 @@ class SurveyReportViewModel (
                     app.userCredentialsRepository
                 val surveyReportRepository =
                     app.surveyReportRepository
+                val appBootRepository =
+                    app.appBootRepository
                 SurveyReportViewModel(
                     userCredentialsRepository = userCredentialsRepository,
                     surveyReportRepository = surveyReportRepository,
+                    appBootRepository = appBootRepository,
                 )
             }
         }
@@ -56,7 +61,13 @@ class SurveyReportViewModel (
     //Navigation
     private val _navRequest = MutableSharedFlow<SurveyReportNavRequest>()
     val navRequest = _navRequest.asSharedFlow()
+    //Startup logic
+    private val _appHasLoaded = appBootRepository.appHasLoaded
+    val appHasLoaded = _appHasLoaded.asStateFlow()
     //Hooks
+    fun setAppBootAsLoaded() {
+        _appHasLoaded.update { true }
+    }
     fun logOut() {
         viewModelScope.launch {
             userCredentialsRepository.saveToPreferencesStore(

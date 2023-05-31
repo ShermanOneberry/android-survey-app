@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -97,6 +98,22 @@ fun SurveyReportScreen(
                 }
             }
     }
+    val appHasLoaded by surveyReportViewModel.appHasLoaded.collectAsState()
+    LaunchedEffect(Unit) {
+        if (appHasLoaded) {
+            return@LaunchedEffect
+        }
+        if (credentials?.tryGetNotNullCredentials() != null) {
+            surveyReportViewModel.setAppBootAsLoaded()
+            return@LaunchedEffect
+        }
+        val possibleUsername = credentials?.username
+        if (possibleUsername != null) {
+            navigateToLogin(possibleUsername)
+        } else {
+            navigateToLogin("")
+        }
+    }
     Column(
         modifier = Modifier
             .padding(contentPadding) //Margin
@@ -108,6 +125,20 @@ fun SurveyReportScreen(
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        if (!appHasLoaded) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "Loading...",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
+            //TODO: Maybe consider adding a 'proper' loading screen instead?
+            return //Suppress rendering
+        }
 
         val displayUser = credentials?.username
         if(displayUser != null) {
