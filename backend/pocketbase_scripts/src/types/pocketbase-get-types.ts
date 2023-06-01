@@ -1,15 +1,16 @@
-import {UsersResponse, SurveyDetailsResponse} from "./pocketbase-types"
+import {UsersResponse, SurveyDetailsResponse} from "./pocketbase-types.ts"
+
 export type TformData = {
     blockLocation: string
     boxCount: string
     cameraCount: string
     carparkLevel: string
     corridorLevel: string
-    groundType: string
+    groundType: "VOID_DECK" | "GRASS_PATCH" | "OTHER"
     hasAdditionalNotes: boolean
     isFeasible: boolean
     locationDistance: string
-    locationType: string
+    locationType: "CORRIDOR" | "STAIRWAY" | "GROUND" | "MULTISTORYCARPARK" | "ROOF"
     nearbyDescription: string
     nonFeasibleExplanation: string
     stairwayLowerLevel: string

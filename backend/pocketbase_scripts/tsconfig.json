@@ -2,8 +2,12 @@
   "compilerOptions": {
     "outDir": "./built",
     "allowJs": true,
-    "module": "commonjs",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "target": "es2022", //Server side code, so we don't care about brower compatability
+
+    "allowImportingTsExtensions": true,
+    "noEmit": true, //Using ts-node
   },
   "include": ["./src/**/*"]
 }

@@ -1,15 +1,17 @@
 import PocketBase from 'pocketbase';
-import { TformData, Texpand } from "./types/pocketbase-get-types"
-import {Collections, SurveyResultsResponse} from "./types/pocketbase-types"
-import Excel = require('@siema-team/spreadsheets');
+import { TformData, Texpand } from "./types/pocketbase-get-types.ts"
+import {Collections, SurveyResultsResponse} from "./types/pocketbase-types.ts"
+import Excel from 'exceljs';
 import axios from 'axios';
-require('dotenv').config()
+
+import dotenv from 'dotenv'
+dotenv.config()
 
 const pb = new PocketBase('http://127.0.0.1:8090');
 
 var fileToken = null
 
-function axios_get_image_buffer(url: string) {
+function axios_get_image_buffer(url: string):Promise<Buffer|null> {
     return axios
     .get(url, {
       responseType: 'arraybuffer'
@@ -20,7 +22,8 @@ function axios_get_image_buffer(url: string) {
       });
 }
 
-async function get_image_from_pocketbase(record, imageRef: string) {
+async function get_image_from_pocketbase(
+    record: SurveyResultsResponse<TformData, Texpand>, imageRef: string) {
     if (fileToken === null){
         fileToken = await pb.files.getToken()
     }
@@ -38,6 +41,36 @@ async function get_image_from_pocketbase(record, imageRef: string) {
     return buffer
 
 }
+function generateLocationDescription(report: TformData): string {
+    const nearbyLocationText = 
+    report.nearbyDescription.trim().length == 0 ? "" : " " + report.nearbyDescription.trim()
+    const distanceNumber =
+    report.locationDistance.substring(0, report.locationDistance.length - 1).trim()
+    const generalLocationDescription =
+            `${report.blockLocation.trim()} ${report.streetLocation.trim()}` +
+            `${nearbyLocationText}. Distance: ${distanceNumber} meters away`
+    switch(report.locationType) {
+        case "CORRIDOR":
+            return `Deploy at level ${report.corridorLevel.trim()} ` +
+                    `common corridor of ${generalLocationDescription}`
+        case "STAIRWAY":
+            const lowerLevel: string = report.stairwayLowerLevel.trim()
+            const upperLevel: string = (parseInt(lowerLevel) + 1).toString()
+            return "Deploy at staircase landing between " +
+                `level ${lowerLevel} and ${upperLevel} of ${generalLocationDescription}`
+        case "GROUND":
+            const groundTypeFragment = {
+                "VOID_DECK": "void deck ",
+                "GRASS_PATCH": "grass patch ",
+                "OTHER": "",
+            }[report.groundType]
+            return `Deploy at ground level ${groundTypeFragment}of ${generalLocationDescription}`
+        case "MULTISTORYCARPARK":
+            return `Deploy at MSCP level ${report.carparkLevel} of ${generalLocationDescription}`
+        case "ROOF":
+            return "Deploy at roof of $generalLocationDescription" 
+    }
+}
 
 async function generate_batch_report(batch_num) {
     const records = await pb.collection(Collections.SurveyResults)
@@ -53,7 +86,7 @@ async function generate_batch_report(batch_num) {
     }
     worksheet.getCell("A2").value = `BATCH NO: ${batch_num}`
     
-    records.forEach(record => {
+    records.forEach(async record => {
         console.log(record)
         const rowOffset = 5
         const originalRequest = record.expand.surveyRequest
@@ -67,14 +100,26 @@ async function generate_batch_report(batch_num) {
         row.getCell("F").value = originalRequest.cameraFocusPoint
 
         row.getCell("G").value = record.expand.assignedUser.name
-
-        //TODO: Clarify what should date/time reference exactly. (Cells H,I)
         const formData = record.formData
+
+        row.getCell("H").value = formData.surveyDate //TODO: Make formatting match reference report
+        row.getCell("I").value = formData.surveyTime //TODO: Make formatting match reference report
         row.getCell("J").value = formData.isFeasible ? "Yes" : "No"
+
+        const reasonImageBuffer = await get_image_from_pocketbase(record, record.reasonImage)
+        const reasonImageID = workbook.addImage({ //TODO: Figure out why this breaks value assignment of cells
+            buffer: reasonImageBuffer,
+            extension: "jpeg", //Assumption of phone picture format
+        });
         if (formData.isFeasible) {
-            //TODO: Rows K-N
+            row.getCell("K").value = formData.boxCount
+            row.getCell("L").value = formData.cameraCount
+            row.getCell("M").value = generateLocationDescription(formData)
+            console.log(row.getCell("M").value)
+            worksheet.addImage(reasonImageID, `N${rowNum}:N${rowNum}`)
             worksheet.mergeCells(`O${rowNum}:P${rowNum}`)
             row.getCell("O").value = "N/A" //TODO: Check this works
+            console.log("TESTING TESTING 123")
         } else {
             worksheet.mergeCells(`K${rowNum}:N${rowNum}`)
             row.getCell("K").value = "N/A" //TODO: Check this works
