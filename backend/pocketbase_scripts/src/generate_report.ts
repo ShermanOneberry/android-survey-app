@@ -1,13 +1,15 @@
-const PocketBase = require('pocketbase/cjs');
-const Excel = require('@siema-team/spreadsheets');
-const axios = require('axios');
+import PocketBase from 'pocketbase';
+import { TformData, Texpand } from "./types/pocketbase-get-types"
+import {Collections, SurveyResultsResponse} from "./types/pocketbase-types"
+import Excel = require('@siema-team/spreadsheets');
+import axios from 'axios';
 require('dotenv').config()
 
 const pb = new PocketBase('http://127.0.0.1:8090');
 
 var fileToken = null
 
-function axios_get_image_buffer(url) {
+function axios_get_image_buffer(url: string) {
     return axios
     .get(url, {
       responseType: 'arraybuffer'
@@ -18,7 +20,7 @@ function axios_get_image_buffer(url) {
       });
 }
 
-async function get_image_from_pocketbase(record, imageRef) {
+async function get_image_from_pocketbase(record, imageRef: string) {
     if (fileToken === null){
         fileToken = await pb.files.getToken()
     }
@@ -34,15 +36,12 @@ async function get_image_from_pocketbase(record, imageRef) {
         return null //TODO: Throw error
     }
     return buffer
-    //fileToken has expired, refresh it
-    //TODO: Get image and return if successful
-    //TODO: If not successful, get fresh file token and try agian
-    //TODO: If fail again, throw error
-    
+
 }
 
-async function generate_batch_report(batch_num, fileToken) {
-    const records = await pb.collection("surveyResults").getFullList({
+async function generate_batch_report(batch_num) {
+    const records = await pb.collection(Collections.SurveyResults)
+    .getFullList<SurveyResultsResponse<TformData, Texpand>>({
         expand: "surveyRequest,assignedUser",
         filter: `surveyRequest.batchNumber=${batch_num}`,
     });
@@ -89,8 +88,7 @@ async function generate_batch_report(batch_num, fileToken) {
 async function main() {
     const authData = await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
     console.log('Authentication successful:', authData);
-    const fileToken = pb.files.getToken()
-    generate_batch_report(1, fileToken)
+    generate_batch_report(1)
 }
 
 main().catch((error) => {

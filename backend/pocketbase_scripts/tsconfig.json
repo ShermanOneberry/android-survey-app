@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "./built",
+    "allowJs": true,
+    "module": "commonjs",
+    "target": "es2022", //Server side code, so we don't care about brower compatability
+  },
+  "include": ["./src/**/*"]
+}
