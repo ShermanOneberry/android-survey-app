@@ -126,15 +126,15 @@ function createExcelBaseTemplate(batch_num: number): [xl.Workbook, xl.Worksheet,
             bottom: {
                 style: "thin"
             },
-        },
-        fill: {
-            type: "pattern",
-            patternType: "solid",
-            fgColor: "F2F2F2"
         }
     }
     const cellStyle = workbook.createStyle(commonStyleData)
     commonStyleData.font.bold = true
+    commonStyleData.fill = {
+        type: "pattern",
+        patternType: "solid",
+        fgColor: "F2F2F2"
+    }
     const headerStyle = workbook.createStyle(commonStyleData)
 
     worksheet.row(5).setHeight(81.6)
@@ -185,7 +185,119 @@ function createExcelBaseTemplate(batch_num: number): [xl.Workbook, xl.Worksheet,
     worksheet.column(17).setWidth(34.33)
     worksheet.cell(5,18).string("Site Survey Conclusion").style(headerStyle)
     worksheet.column(18).setWidth(16.67)
+
+    worksheet.row(5).freeze()
     return [workbook, worksheet, cellStyle]
+}
+async function processSingleRecord(
+    template: [xl.Workbook, xl.Worksheet, xl.Style], 
+    record: SurveyResultsResponse<TformData, Texpand>
+) {
+    const [/* workbook */ , worksheet, cellStyle] = template
+    console.log(record)
+    const rowOffset = 5
+    const originalRequest = record.expand.surveyRequest
+    const rowNum = rowOffset + originalRequest.batchNumber
+
+    worksheet.row(rowNum).setHeight(249.75)
+
+    worksheet.cell(rowNum, 1).number(originalRequest.batchNumber).style(cellStyle)
+    worksheet.cell(rowNum, 2).string(originalRequest.block).style(cellStyle).style({font: {bold: true}})
+    worksheet.cell(rowNum, 3).string(originalRequest.streetName).style(cellStyle).style({font: {bold: true}})
+    worksheet.cell(rowNum, 4).string(originalRequest.area).style(cellStyle)
+    worksheet.cell(rowNum, 5).string(originalRequest.suspectUnit).style(cellStyle)
+    worksheet.cell(rowNum, 6).string(originalRequest.cameraFocusPoint).style(cellStyle)
+
+    worksheet.cell(rowNum, 7).string(record.expand.assignedUser.name).style(cellStyle)
+    const formData = record.formData
+
+    worksheet.cell(rowNum, 8).string(formData.surveyDate).style(cellStyle) //TODO: Make formatting match reference report
+    worksheet.cell(rowNum, 9).string(formData.surveyTime).style(cellStyle) //TODO: Make formatting match reference report
+    worksheet.cell(rowNum, 10).string(formData.isFeasible ? "Yes" : "No").style(cellStyle)
+
+    const reasonImageBuffer = await get_image_from_pocketbase(record, record.reasonImage)
+
+    const cm_in_emu = 360000
+    const margin_in_emu = cm_in_emu / 2
+
+    if (formData.isFeasible) {
+        worksheet.cell(rowNum, 11).string(formData.boxCount).style(cellStyle)
+        worksheet.cell(rowNum, 12).string(formData.cameraCount).style(cellStyle)
+        worksheet.cell(rowNum, 13).string(generateLocationDescription(formData)).style(cellStyle)
+        worksheet.cell(rowNum, 14).style(cellStyle)
+        worksheet.addImage({
+            image: reasonImageBuffer,
+            type: 'picture',
+            position: {
+              type: 'twoCellAnchor',
+              from: {
+                col: 14,
+                colOff: margin_in_emu,
+                row: rowNum,
+                rowOff: margin_in_emu,
+              },
+              to: {
+                col: 15,
+                colOff: -margin_in_emu,
+                row: rowNum+1,
+                rowOff: -margin_in_emu,
+              },
+            },
+          });
+        worksheet.cell(rowNum, 15, rowNum, 16, true).string("N/A").style(cellStyle)
+    } else {
+        worksheet.cell(rowNum, 11,rowNum,14,true).string("N/A").style(cellStyle)
+        worksheet.cell(rowNum, 15).string(formData.nonFeasibleExplanation)
+        worksheet.addImage({
+            image: reasonImageBuffer,
+            type: 'picture',
+            position: {
+              type: 'twoCellAnchor',
+              from: {
+                col: 15,
+                colOff: margin_in_emu,
+                row: rowNum,
+                rowOff: margin_in_emu * 4,
+              },
+              to: {
+                col: 16,
+                colOff: -margin_in_emu,
+                row: rowNum+1,
+                rowOff: -margin_in_emu,
+              },
+            },
+          });
+          worksheet.cell(rowNum, 16).string("N/A").style(cellStyle)
+    }
+
+    if (formData.hasAdditionalNotes) {
+        worksheet.cell(rowNum, 17).string(formData.techniciansNotes).style(cellStyle)
+        const additionalImage = await get_image_from_pocketbase(record, record.additionalImage)
+        worksheet.addImage({
+            image: additionalImage,
+            type: 'picture',
+            position: {
+              type: 'twoCellAnchor',
+              from: {
+                col: 15,
+                colOff: margin_in_emu,
+                row: rowNum,
+                rowOff: margin_in_emu * 4,
+              },
+              to: {
+                col: 16,
+                colOff: -margin_in_emu,
+                row: rowNum+1,
+                rowOff: -margin_in_emu,
+              },
+            },
+          });
+    } else {
+        worksheet.cell(rowNum, 17).string("N/A").style(cellStyle)
+    }
+    worksheet.cell(rowNum, 18).string("N/A").style(cellStyle)
+    //const reasonUrl = pb.files.getUrl(record, record.reasonImage, {'token': fileToken});
+    //row.commit()
 }
 
 async function generate_batch_report(batch_num: number){
@@ -194,44 +306,11 @@ async function generate_batch_report(batch_num: number){
         expand: "surveyRequest,assignedUser",
         filter: `surveyRequest.batchNumber=${batch_num}`,
     });
-    const [workbook, worksheet, cellStyle] = createExcelBaseTemplate(batch_num)
+    const template = createExcelBaseTemplate(batch_num)
+    const workbook = template[0]
     
     for (const record of records){
-        console.log(record)
-        const rowOffset = 5
-        const originalRequest = record.expand.surveyRequest
-        const rowNum = rowOffset + originalRequest.batchNumber
-
-        worksheet.row(rowNum).setHeight(249.75)
-
-        worksheet.cell(rowNum, 1).number(originalRequest.batchNumber).style(cellStyle)
-        worksheet.cell(rowNum, 2).string(originalRequest.block).style(cellStyle).style({font: {bold: true}})
-        worksheet.cell(rowNum, 3).string(originalRequest.streetName).style(cellStyle).style({font: {bold: true}})
-        worksheet.cell(rowNum, 4).string(originalRequest.area).style(cellStyle)
-        worksheet.cell(rowNum, 5).string(originalRequest.suspectUnit).style(cellStyle)
-        worksheet.cell(rowNum, 6).string(originalRequest.cameraFocusPoint).style(cellStyle)
-
-        worksheet.cell(rowNum, 7).string(record.expand.assignedUser.name).style(cellStyle)
-        const formData = record.formData
-
-        worksheet.cell(rowNum, 8).string(formData.surveyDate).style(cellStyle) //TODO: Make formatting match reference report
-        worksheet.cell(rowNum, 9).string(formData.surveyTime).style(cellStyle) //TODO: Make formatting match reference report
-        worksheet.cell(rowNum, 10).string(formData.isFeasible ? "Yes" : "No").style(cellStyle)
-
-        const reasonImageBuffer = await get_image_from_pocketbase(record, record.reasonImage)
-
-        if (formData.isFeasible) {
-            worksheet.cell(rowNum, 11).string(formData.boxCount).style(cellStyle)
-            worksheet.cell(rowNum, 12).string(formData.cameraCount).style(cellStyle)
-            worksheet.cell(rowNum, 13).string(generateLocationDescription(formData)).style(cellStyle)
-            //TODO: Add image
-            worksheet.cell(rowNum, 15, rowNum, 16, true).string("N/A").style(cellStyle)//TODO: Check this works
-        } else {
-            worksheet.cell(rowNum,11,rowNum,14,true).string("N/A").style(cellStyle) //TODO: Check this works
-            //TODO: column 15,16
-        }
-        //const reasonUrl = pb.files.getUrl(record, record.reasonImage, {'token': fileToken});
-        //row.commit()
+        await processSingleRecord(template, record)
     }
     const buffer = await workbook.writeToBuffer();
     fs.writeFileSync(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`, buffer);
