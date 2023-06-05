@@ -9,22 +9,24 @@ dotenv.config()
 
 const pb = new PocketBase('http://127.0.0.1:8090');
 
-var fileToken = null
 
-function axios_get_image_buffer(url: string):Promise<Buffer|null> {
-    return axios
-    .get(url, {
-      responseType: 'arraybuffer'
-    })
-    .then(response => Buffer.from(response.data, 'binary'))
-    .catch(function (_) {
-        return null
-      });
+async function axios_get_image_buffer(url: string):Promise<Buffer|null> {
+    try {
+        const response = await axios
+            .get(url, {
+                responseType: 'arraybuffer'
+            });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return response.data;
+    } catch {
+        return null;
+    }
 }
 
+let fileToken:string = null
 async function get_image_from_pocketbase(
     record: SurveyResultsResponse<TformData, Texpand>, imageRef: string) {
-    if (fileToken === null){
+    if (fileToken == null){
         fileToken = await pb.files.getToken()
     }
     let url = pb.files.getUrl(record, imageRef, {'token': fileToken});
@@ -54,17 +56,21 @@ function generateLocationDescription(report: TformData): string {
             return `Deploy at level ${report.corridorLevel.trim()} ` +
                     `common corridor of ${generalLocationDescription}`
         case "STAIRWAY":
-            const lowerLevel: string = report.stairwayLowerLevel.trim()
-            const upperLevel: string = (parseInt(lowerLevel) + 1).toString()
-            return "Deploy at staircase landing between " +
-                `level ${lowerLevel} and ${upperLevel} of ${generalLocationDescription}`
+            {
+                const lowerLevel: string = report.stairwayLowerLevel.trim()
+                const upperLevel: string = (parseInt(lowerLevel) + 1).toString()
+                return "Deploy at staircase landing between " +
+                    `level ${lowerLevel} and ${upperLevel} of ${generalLocationDescription}`
+            }
         case "GROUND":
-            const groundTypeFragment = {
-                "VOID_DECK": "void deck ",
-                "GRASS_PATCH": "grass patch ",
-                "OTHER": "",
-            }[report.groundType]
-            return `Deploy at ground level ${groundTypeFragment}of ${generalLocationDescription}`
+            {
+                const groundTypeFragment = {
+                    "VOID_DECK": "void deck ",
+                    "GRASS_PATCH": "grass patch ",
+                    "OTHER": "",
+                }[report.groundType]
+                return `Deploy at ground level ${groundTypeFragment}of ${generalLocationDescription}`
+            }
         case "MULTISTORYCARPARK":
             return `Deploy at MSCP level ${report.carparkLevel} of ${generalLocationDescription}`
         case "ROOF":
@@ -72,7 +78,7 @@ function generateLocationDescription(report: TformData): string {
     }
 }
 
-async function generate_batch_report(batch_num) {
+async function generate_batch_report(batch_num: number){
     const records = await pb.collection(Collections.SurveyResults)
     .getFullList<SurveyResultsResponse<TformData, Texpand>>({
         expand: "surveyRequest,assignedUser",
@@ -86,7 +92,7 @@ async function generate_batch_report(batch_num) {
     }
     worksheet.getCell("A2").value = `BATCH NO: ${batch_num}`
     
-    records.forEach(async record => {
+    for (const record of records){
         console.log(record)
         const rowOffset = 5
         const originalRequest = record.expand.surveyRequest
@@ -127,16 +133,16 @@ async function generate_batch_report(batch_num) {
         }
         //const reasonUrl = pb.files.getUrl(record, record.reasonImage, {'token': fileToken});
         row.commit()
-    });
+    }
     await workbook.xlsx.writeFile(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`);
 }
 async function main() {
     const authData = await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
     console.log('Authentication successful:', authData);
-    generate_batch_report(1)
+    await generate_batch_report(1)
 }
 
-main().catch((error) => {
+await main().catch((error) => {
         console.error('An error occurred while generating the report:', error);
         process.exit(1); 
-});;
+})
