@@ -20,7 +20,7 @@ async function load_proposed_sites(path: string) {
     let current_row = 9
     let batchID_string: string
 
-    while((batchID_string = worksheet.getCell(`A${current_row}`).text).trim() == "") {
+    while((batchID_string = worksheet.getCell(`A${current_row}`).text).trim() != "") {
         const batchID = Number(batchID_string)
         const surveyDetails : SurveyDetailsCustomRecord = {
             id: `${batchNumber}_${batchID}`.padEnd(15,"_"),
