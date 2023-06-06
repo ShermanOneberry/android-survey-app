@@ -11,9 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@siema-team/spreadsheets": "^1.0.202305051500",
     "axios": "^1.4.0",
+    "date-fns": "^2.30.0",
     "dotenv": "^16.0.3",
+    "excel4node": "^1.8.2",
     "pocketbase": "^0.15.0"
   },
   "devDependencies": {

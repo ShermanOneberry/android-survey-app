@@ -1,7 +1,10 @@
 import PocketBase from 'pocketbase';
 import { TformData, Texpand } from "./types/pocketbase-get-types.ts"
 import {Collections, SurveyResultsResponse} from "./types/pocketbase-types.ts"
-import Excel from '@siema-team/spreadsheets';
+import {createExcelBaseTemplate} from "./report_template.ts"
+import {format, parse} from "date-fns"
+import xl, {Style} from "excel4node"
+import fs from "fs"
 import axios from 'axios';
 
 import dotenv from 'dotenv'
@@ -43,24 +46,27 @@ async function get_image_from_pocketbase(
     return buffer
 
 }
-function generateLocationDescription(report: TformData): string {
+function generateLocationDescription(report: TformData, defaultStyle: Style): (string|(Style["font"]&{value?:string}))[] {
     const nearbyLocationText = 
     report.nearbyDescription.trim().length == 0 ? "" : " " + report.nearbyDescription.trim()
     const distanceNumber =
     report.locationDistance.substring(0, report.locationDistance.length - 1).trim()
-    const generalLocationDescription =
+    const generalLocationDescriptionPartial =
             `${report.blockLocation.trim()} ${report.streetLocation.trim()}` +
-            `${nearbyLocationText}. Distance: ${distanceNumber} meters away`
+            `${nearbyLocationText}. Distance: `
+    let formatFirstPart:string
     switch(report.locationType) {
         case "CORRIDOR":
-            return `Deploy at level ${report.corridorLevel.trim()} ` +
-                    `common corridor of ${generalLocationDescription}`
+            formatFirstPart =  `Deploy at level ${report.corridorLevel.trim()} ` +
+                    `common corridor of ${generalLocationDescriptionPartial}`
+            break
         case "STAIRWAY":
             {
                 const lowerLevel: string = report.stairwayLowerLevel.trim()
                 const upperLevel: string = (parseInt(lowerLevel) + 1).toString()
-                return "Deploy at staircase landing between " +
-                    `level ${lowerLevel} and ${upperLevel} of ${generalLocationDescription}`
+                formatFirstPart =  "Deploy at staircase landing between " +
+                    `level ${lowerLevel} and ${upperLevel} of ${generalLocationDescriptionPartial}`
+                break
             }
         case "GROUND":
             {
@@ -69,13 +75,156 @@ function generateLocationDescription(report: TformData): string {
                     "GRASS_PATCH": "grass patch ",
                     "OTHER": "",
                 }[report.groundType]
-                return `Deploy at ground level ${groundTypeFragment}of ${generalLocationDescription}`
+                formatFirstPart = `Deploy at ground level ${groundTypeFragment}of ${generalLocationDescriptionPartial}`
+                break
             }
         case "MULTISTORYCARPARK":
-            return `Deploy at MSCP level ${report.carparkLevel} of ${generalLocationDescription}`
+            formatFirstPart = `Deploy at MSCP level ${report.carparkLevel} of ${generalLocationDescriptionPartial}`
+            break
         case "ROOF":
-            return "Deploy at roof of $generalLocationDescription" 
+            formatFirstPart = `Deploy at roof of ${generalLocationDescriptionPartial}`
+            break
     }
+    const returnValue = [
+        formatFirstPart,
+        {bold: true, value: distanceNumber.toString(), ...defaultStyle.font},
+        {bold: false, value: " meters away", ...defaultStyle.font},
+    ]
+    console.log(returnValue)
+    return returnValue
+}
+
+const CM_IN_EMU = 360000
+const MARGIN_IN_EMU = CM_IN_EMU / 3
+
+async function processSingleRecord(
+    template: [xl.Workbook, xl.Worksheet, xl.Style], 
+    record: SurveyResultsResponse<TformData, Texpand>
+) {
+    const [/* workbook */ , worksheet, cellStyle] = template
+    console.log(record)
+    const rowOffset = 5
+    const originalRequest = record.expand.surveyRequest
+    const rowNum = rowOffset + originalRequest.batchNumber
+
+    worksheet.row(rowNum).setHeight(249.75)
+
+    worksheet.cell(rowNum, 1).number(originalRequest.batchNumber).style(cellStyle)
+    worksheet.cell(rowNum, 2).string(originalRequest.block).style(cellStyle).style({font: {bold: true}})
+    worksheet.cell(rowNum, 3).string(originalRequest.streetName).style(cellStyle).style(
+        {font: {bold: true}, alignment: {horizontal: "left"}}
+    )
+    worksheet.cell(rowNum, 4).string(originalRequest.area).style(cellStyle)
+    worksheet.cell(rowNum, 5).string(originalRequest.suspectUnit).style(cellStyle)
+    worksheet.cell(rowNum, 6).string(originalRequest.cameraFocusPoint).style(cellStyle)
+
+    worksheet.cell(rowNum, 7).string(record.expand.assignedUser.name).style(cellStyle)
+    const formData = record.formData
+
+    worksheet.cell(rowNum, 8).style(cellStyle).string(
+        format(new Date(formData.surveyDate), "d/M/yyyy")
+    )
+    worksheet.cell(rowNum, 9).style(cellStyle).string(
+        format(
+            parse(formData.surveyTime, "HH:mm:ss.SSS", new Date(formData.surveyDate)),
+            "HH:mm 'hrs'"
+        )
+    ) //TODO: Make formatting match reference report
+    worksheet.cell(rowNum, 10).string(formData.isFeasible ? "Yes" : "No").style(cellStyle)
+
+    const reasonImageBuffer = await get_image_from_pocketbase(record, record.reasonImage)
+
+    if (formData.isFeasible) {
+        worksheet.cell(rowNum, 11).string(formData.boxCount).style(cellStyle)
+        worksheet.cell(rowNum, 12).string(formData.cameraCount).style(cellStyle)
+        worksheet.cell(rowNum, 13)
+            .style(cellStyle)
+            .style({alignment:{horizontal:"left"}})
+            .string(generateLocationDescription(formData, cellStyle))
+        worksheet.cell(rowNum, 14).style(cellStyle)
+        worksheet.addImage({
+            image: reasonImageBuffer,
+            type: 'picture',
+            position: {
+              type: 'twoCellAnchor',
+              from: {
+                col: 14,
+                colOff: MARGIN_IN_EMU,
+                row: rowNum,
+                rowOff: MARGIN_IN_EMU,
+              },
+              to: {
+                col: 15,
+                colOff: -MARGIN_IN_EMU,
+                row: rowNum+1,
+                rowOff: -MARGIN_IN_EMU,
+              },
+            },
+          });
+        worksheet.cell(rowNum, 15, rowNum, 16, true).string("N/A").style(cellStyle)
+    } else {
+        worksheet.cell(rowNum, 11,rowNum,14,true).string("N/A").style(cellStyle).style({
+            alignment: {
+                horizontal: "left",
+                vertical: "top",
+            }
+        })
+        worksheet.cell(rowNum, 15).string(formData.nonFeasibleExplanation)
+        worksheet.addImage({
+            image: reasonImageBuffer,
+            type: 'picture',
+            position: {
+              type: 'twoCellAnchor',
+              from: {
+                col: 15,
+                colOff: MARGIN_IN_EMU,
+                row: rowNum,
+                rowOff: CM_IN_EMU * 2,
+              },
+              to: {
+                col: 16,
+                colOff: -MARGIN_IN_EMU,
+                row: rowNum+1,
+                rowOff: -MARGIN_IN_EMU,
+              },
+            },
+          });
+          worksheet.cell(rowNum, 16).string("N/A").style(cellStyle)
+    }
+
+    if (formData.hasAdditionalNotes) {
+        worksheet.cell(rowNum, 17).string(formData.techniciansNotes).style(cellStyle).style({
+            alignment: {
+                horizontal: "left",
+                vertical: "top",
+            }
+        })
+        const additionalImage = await get_image_from_pocketbase(record, record.additionalImage)
+        worksheet.addImage({
+            image: additionalImage,
+            type: 'picture',
+            position: {
+              type: 'twoCellAnchor',
+              from: {
+                col: 17,
+                colOff: MARGIN_IN_EMU,
+                row: rowNum,
+                rowOff: CM_IN_EMU * 2,
+              },
+              to: {
+                col: 18,
+                colOff: -MARGIN_IN_EMU,
+                row: rowNum+1,
+                rowOff: -MARGIN_IN_EMU,
+              },
+            },
+          });
+    } else {
+        worksheet.cell(rowNum, 17).string("N/A").style(cellStyle)
+    }
+    worksheet.cell(rowNum, 18).string("N/A").style(cellStyle)
+    //const reasonUrl = pb.files.getUrl(record, record.reasonImage, {'token': fileToken});
+    //row.commit()
 }
 
 async function generate_batch_report(batch_num: number){
@@ -84,57 +233,14 @@ async function generate_batch_report(batch_num: number){
         expand: "surveyRequest,assignedUser",
         filter: `surveyRequest.batchNumber=${batch_num}`,
     });
-    const workbook = new Excel.Workbook();
-    await workbook.xlsx.readFile("./template/Contractor Deployment Plan Batch XXX.xlsx");
-    const worksheet = workbook.getWorksheet("Contractor's Deployment Plans");
-    if (worksheet === undefined) {
-        return //TODO: Throw error
-    }
-    worksheet.getCell("A2").value = `BATCH NO: ${batch_num}`
+    const template = createExcelBaseTemplate(batch_num)
+    const workbook = template[0]
     
     for (const record of records){
-        console.log(record)
-        const rowOffset = 5
-        const originalRequest = record.expand.surveyRequest
-        const rowNum = rowOffset + originalRequest.batchNumber
-        const row = worksheet.getRow(rowNum)
-
-        row.getCell("B").value = originalRequest.block
-        row.getCell("C").value = originalRequest.streetName
-        row.getCell("D").value = originalRequest.area
-        row.getCell("E").value = originalRequest.suspectUnit
-        row.getCell("F").value = originalRequest.cameraFocusPoint
-
-        row.getCell("G").value = record.expand.assignedUser.name
-        const formData = record.formData
-
-        row.getCell("H").value = formData.surveyDate //TODO: Make formatting match reference report
-        row.getCell("I").value = formData.surveyTime //TODO: Make formatting match reference report
-        row.getCell("J").value = formData.isFeasible ? "Yes" : "No"
-
-        const reasonImageBuffer = await get_image_from_pocketbase(record, record.reasonImage)
-        const reasonImageID = workbook.addImage({ //TODO: Figure out why this breaks value assignment of cells
-            buffer: reasonImageBuffer,
-            extension: "jpeg", //Assumption of phone picture format
-        });
-        if (formData.isFeasible) {
-            row.getCell("K").value = formData.boxCount
-            row.getCell("L").value = formData.cameraCount
-            row.getCell("M").value = generateLocationDescription(formData)
-            console.log(row.getCell("M").value)
-            worksheet.addImage(reasonImageID, `N${rowNum}:N${rowNum}`)
-            worksheet.mergeCells(`O${rowNum}:P${rowNum}`)
-            row.getCell("O").value = "N/A" //TODO: Check this works
-            console.log("TESTING TESTING 123")
-        } else {
-            worksheet.mergeCells(`K${rowNum}:N${rowNum}`)
-            row.getCell("K").value = "N/A" //TODO: Check this works
-            //TODO: Rows O,P
-        }
-        //const reasonUrl = pb.files.getUrl(record, record.reasonImage, {'token': fileToken});
-        row.commit()
+        await processSingleRecord(template, record)
     }
-    await workbook.xlsx.writeFile(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`);
+    const buffer = await workbook.writeToBuffer();
+    fs.writeFileSync(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`, buffer);
 }
 async function main() {
     const authData = await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)

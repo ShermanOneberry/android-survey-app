@@ -14,6 +14,7 @@ module.exports = {
     },
     ignorePatterns: [
       ".eslintrc.cjs", 
+      "**/*.d.ts", //Ignore excel4node type definition
     ],
     
   };
