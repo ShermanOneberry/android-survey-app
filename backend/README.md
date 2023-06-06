@@ -25,6 +25,7 @@ The background scripts `load_db` and `generate_report` are avalaible, and are in
 
 Commands:
 - `npm run load_db` will take Excel files in the folder `proposed_sites`, and load them onto the Pocketbase backend. This is needed for both upload verification, and for later report generation. 
+  - *NOTE* that the command is idempotent, and that you can also run the command on updated Excel files.
   - *NOTE* that the Excel files are expected to follow a very particualr format, and that any changes 
   - TODO: Get the load folder to be changable by cli args, with sensible defaults
 - `npm run generate_report` will generate the desired Excel reports from the site surveys and the data obtained from the `load_db` script. Currently, the generated reports will be placed in the `generated_reports` folder.
