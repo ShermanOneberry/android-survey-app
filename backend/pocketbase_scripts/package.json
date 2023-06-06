@@ -14,7 +14,6 @@
     "@siema-team/spreadsheets": "^1.0.202305051500",
     "axios": "^1.4.0",
     "dotenv": "^16.0.3",
-    "exceljs": "^4.3.0",
     "pocketbase": "^0.15.0"
   },
   "devDependencies": {

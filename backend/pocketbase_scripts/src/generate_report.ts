@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase';
 import { TformData, Texpand } from "./types/pocketbase-get-types.ts"
 import {Collections, SurveyResultsResponse} from "./types/pocketbase-types.ts"
-import Excel from 'exceljs';
+import Excel from '@siema-team/spreadsheets';
 import axios from 'axios';
 
 import dotenv from 'dotenv'
