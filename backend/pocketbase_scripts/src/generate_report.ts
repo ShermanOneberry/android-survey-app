@@ -1,7 +1,9 @@
 import PocketBase from 'pocketbase';
 import { TformData, Texpand } from "./types/pocketbase-get-types.ts"
 import {Collections, SurveyResultsResponse} from "./types/pocketbase-types.ts"
-import xl from "excel4node"
+import {createExcelBaseTemplate} from "./report_template.ts"
+import {format, parse} from "date-fns"
+import xl, {Style} from "excel4node"
 import fs from "fs"
 import axios from 'axios';
 
@@ -44,24 +46,27 @@ async function get_image_from_pocketbase(
     return buffer
 
 }
-function generateLocationDescription(report: TformData): string {
+function generateLocationDescription(report: TformData, defaultStyle: Style): (string|(Style["font"]&{value?:string}))[] {
     const nearbyLocationText = 
     report.nearbyDescription.trim().length == 0 ? "" : " " + report.nearbyDescription.trim()
     const distanceNumber =
     report.locationDistance.substring(0, report.locationDistance.length - 1).trim()
-    const generalLocationDescription =
+    const generalLocationDescriptionPartial =
             `${report.blockLocation.trim()} ${report.streetLocation.trim()}` +
-            `${nearbyLocationText}. Distance: ${distanceNumber} meters away`
+            `${nearbyLocationText}. Distance: `
+    let formatFirstPart:string
     switch(report.locationType) {
         case "CORRIDOR":
-            return `Deploy at level ${report.corridorLevel.trim()} ` +
-                    `common corridor of ${generalLocationDescription}`
+            formatFirstPart =  `Deploy at level ${report.corridorLevel.trim()} ` +
+                    `common corridor of ${generalLocationDescriptionPartial}`
+            break
         case "STAIRWAY":
             {
                 const lowerLevel: string = report.stairwayLowerLevel.trim()
                 const upperLevel: string = (parseInt(lowerLevel) + 1).toString()
-                return "Deploy at staircase landing between " +
-                    `level ${lowerLevel} and ${upperLevel} of ${generalLocationDescription}`
+                formatFirstPart =  "Deploy at staircase landing between " +
+                    `level ${lowerLevel} and ${upperLevel} of ${generalLocationDescriptionPartial}`
+                break
             }
         case "GROUND":
             {
@@ -70,125 +75,28 @@ function generateLocationDescription(report: TformData): string {
                     "GRASS_PATCH": "grass patch ",
                     "OTHER": "",
                 }[report.groundType]
-                return `Deploy at ground level ${groundTypeFragment}of ${generalLocationDescription}`
+                formatFirstPart = `Deploy at ground level ${groundTypeFragment}of ${generalLocationDescriptionPartial}`
+                break
             }
         case "MULTISTORYCARPARK":
-            return `Deploy at MSCP level ${report.carparkLevel} of ${generalLocationDescription}`
+            formatFirstPart = `Deploy at MSCP level ${report.carparkLevel} of ${generalLocationDescriptionPartial}`
+            break
         case "ROOF":
-            return "Deploy at roof of $generalLocationDescription" 
+            formatFirstPart = `Deploy at roof of ${generalLocationDescriptionPartial}`
+            break
     }
+    const returnValue = [
+        formatFirstPart,
+        {bold: true, value: distanceNumber.toString(), ...defaultStyle.font},
+        {bold: false, value: " meters away", ...defaultStyle.font},
+    ]
+    console.log(returnValue)
+    return returnValue
 }
-function createExcelBaseTemplate(batch_num: number): [xl.Workbook, xl.Worksheet, xl.Style]  {
-    const workbook = new xl.Workbook();
-    const worksheet = workbook.addWorksheet(
-        "Contractor's Deployment Plans",
-        {
-            sheetView: {
-                zoomScale: 60
-            }
-        });
 
-    worksheet.cell(1,1).string("CONTRACTOR'S DEPLOYMENT PLAN")
-        .style({
-            font: {
-                size: 16,
-                bold: true,
-                name: "Times New Roman"
-            },
-        })
-    worksheet.cell(2,1).string(`BATCH NO: ${batch_num}`)
-        .style({
-            font: {
-                size: 16,
-                name: "Times New Roman"
-            },
-        })
-    const commonStyleData: xl.Style = {
-        font: {
-            size: 16,
-            name: "Times New Roman",
-        },
-        alignment: {
-            vertical: "center",
-            horizontal: "center",
-            wrapText: true
-        },
-        border: {
-            left: {
-                style: "thin"
-            },
-            right: {
-                style: "thin"
-            },
-            top: {
-                style: "thin"
-            },
-            bottom: {
-                style: "thin"
-            },
-        }
-    }
-    const cellStyle = workbook.createStyle(commonStyleData)
-    commonStyleData.font.bold = true
-    commonStyleData.fill = {
-        type: "pattern",
-        patternType: "solid",
-        fgColor: "F2F2F2"
-    }
-    const headerStyle = workbook.createStyle(commonStyleData)
+const CM_IN_EMU = 360000
+const MARGIN_IN_EMU = CM_IN_EMU / 3
 
-    worksheet.row(5).setHeight(81.6)
-
-    worksheet.cell(5,1).string("No").style(headerStyle)
-    worksheet.column(1).setWidth(4.67)
-    worksheet.cell(5,2).string("Block").style(headerStyle)
-    worksheet.column(2).setWidth(12.89)
-    worksheet.cell(5,3).string("Street Name").style(headerStyle)
-    worksheet.column(3).setWidth(34.67)
-    worksheet.cell(5,4).string("Area").style(headerStyle)
-    worksheet.column(4).setWidth(14.89)
-    worksheet.cell(5,5).string("Suspect Unit(s)").style(headerStyle)
-    worksheet.column(5).setWidth(24.89)
-    worksheet.cell(5,6).string("Camera Focus Point").style(headerStyle)
-    worksheet.column(6).setWidth(24.33)
-
-    worksheet.cell(4,7,4,10, true).string("ASSESSMENT").style(headerStyle)
-
-    worksheet.cell(5,7).string("Team Assignment").style(headerStyle)
-    worksheet.column(7).setWidth(15.56)
-    worksheet.cell(5,8).string("Date").style(headerStyle)
-    worksheet.column(8).setWidth(13.67)
-    worksheet.cell(5,9).string("Time/hrs").style(headerStyle)
-    worksheet.column(9).setWidth(11.78)
-    worksheet.cell(5,10).string("Feasible\n(Yes/No)").style(headerStyle)
-    worksheet.column(10).setWidth(12.22)
-
-    worksheet.cell(4,11,4,14, true).string("FEASIBLE TO DEPLOY").style(headerStyle)
-
-    worksheet.cell(5,11).string("No. of Boxes").style(headerStyle)
-    worksheet.column(11).setWidth(9.33)
-    worksheet.cell(5,12).string("No. of Cameras").style(headerStyle)
-    worksheet.column(12).setWidth(13.11)
-    worksheet.cell(5,13).string("Description of Planned Deployment Location").style(headerStyle)
-    worksheet.column(13).setWidth(29.22)
-    worksheet.cell(5,14).string("Photo of Planned Deployment Location").style(headerStyle)
-    worksheet.column(14).setWidth(29.22)
-
-    worksheet.cell(4,15,4,16, true).string("NOT FEASIBLE TO DEPLOY").style(headerStyle)
-
-    worksheet.cell(5,15).string("Reason").style(headerStyle)
-    worksheet.column(15).setWidth(31.67)
-    worksheet.cell(5,16).string("Suggested Solutions/suggested locations (another option)").style(headerStyle)
-    worksheet.column(16).setWidth(27.11)
-
-    worksheet.cell(5,17).string("Technician's Note").style(headerStyle)
-    worksheet.column(17).setWidth(34.33)
-    worksheet.cell(5,18).string("Site Survey Conclusion").style(headerStyle)
-    worksheet.column(18).setWidth(16.67)
-
-    worksheet.row(5).freeze()
-    return [workbook, worksheet, cellStyle]
-}
 async function processSingleRecord(
     template: [xl.Workbook, xl.Worksheet, xl.Style], 
     record: SurveyResultsResponse<TformData, Texpand>
@@ -203,7 +111,9 @@ async function processSingleRecord(
 
     worksheet.cell(rowNum, 1).number(originalRequest.batchNumber).style(cellStyle)
     worksheet.cell(rowNum, 2).string(originalRequest.block).style(cellStyle).style({font: {bold: true}})
-    worksheet.cell(rowNum, 3).string(originalRequest.streetName).style(cellStyle).style({font: {bold: true}})
+    worksheet.cell(rowNum, 3).string(originalRequest.streetName).style(cellStyle).style(
+        {font: {bold: true}, alignment: {horizontal: "left"}}
+    )
     worksheet.cell(rowNum, 4).string(originalRequest.area).style(cellStyle)
     worksheet.cell(rowNum, 5).string(originalRequest.suspectUnit).style(cellStyle)
     worksheet.cell(rowNum, 6).string(originalRequest.cameraFocusPoint).style(cellStyle)
@@ -211,19 +121,26 @@ async function processSingleRecord(
     worksheet.cell(rowNum, 7).string(record.expand.assignedUser.name).style(cellStyle)
     const formData = record.formData
 
-    worksheet.cell(rowNum, 8).string(formData.surveyDate).style(cellStyle) //TODO: Make formatting match reference report
-    worksheet.cell(rowNum, 9).string(formData.surveyTime).style(cellStyle) //TODO: Make formatting match reference report
+    worksheet.cell(rowNum, 8).style(cellStyle).string(
+        format(new Date(formData.surveyDate), "d/M/yyyy")
+    )
+    worksheet.cell(rowNum, 9).style(cellStyle).string(
+        format(
+            parse(formData.surveyTime, "HH:mm:ss.SSS", new Date(formData.surveyDate)),
+            "HH:mm 'hrs'"
+        )
+    ) //TODO: Make formatting match reference report
     worksheet.cell(rowNum, 10).string(formData.isFeasible ? "Yes" : "No").style(cellStyle)
 
     const reasonImageBuffer = await get_image_from_pocketbase(record, record.reasonImage)
 
-    const cm_in_emu = 360000
-    const margin_in_emu = cm_in_emu / 2
-
     if (formData.isFeasible) {
         worksheet.cell(rowNum, 11).string(formData.boxCount).style(cellStyle)
         worksheet.cell(rowNum, 12).string(formData.cameraCount).style(cellStyle)
-        worksheet.cell(rowNum, 13).string(generateLocationDescription(formData)).style(cellStyle)
+        worksheet.cell(rowNum, 13)
+            .style(cellStyle)
+            .style({alignment:{horizontal:"left"}})
+            .string(generateLocationDescription(formData, cellStyle))
         worksheet.cell(rowNum, 14).style(cellStyle)
         worksheet.addImage({
             image: reasonImageBuffer,
@@ -232,21 +149,26 @@ async function processSingleRecord(
               type: 'twoCellAnchor',
               from: {
                 col: 14,
-                colOff: margin_in_emu,
+                colOff: MARGIN_IN_EMU,
                 row: rowNum,
-                rowOff: margin_in_emu,
+                rowOff: MARGIN_IN_EMU,
               },
               to: {
                 col: 15,
-                colOff: -margin_in_emu,
+                colOff: -MARGIN_IN_EMU,
                 row: rowNum+1,
-                rowOff: -margin_in_emu,
+                rowOff: -MARGIN_IN_EMU,
               },
             },
           });
         worksheet.cell(rowNum, 15, rowNum, 16, true).string("N/A").style(cellStyle)
     } else {
-        worksheet.cell(rowNum, 11,rowNum,14,true).string("N/A").style(cellStyle)
+        worksheet.cell(rowNum, 11,rowNum,14,true).string("N/A").style(cellStyle).style({
+            alignment: {
+                horizontal: "left",
+                vertical: "top",
+            }
+        })
         worksheet.cell(rowNum, 15).string(formData.nonFeasibleExplanation)
         worksheet.addImage({
             image: reasonImageBuffer,
@@ -255,15 +177,15 @@ async function processSingleRecord(
               type: 'twoCellAnchor',
               from: {
                 col: 15,
-                colOff: margin_in_emu,
+                colOff: MARGIN_IN_EMU,
                 row: rowNum,
-                rowOff: margin_in_emu * 4,
+                rowOff: CM_IN_EMU * 2,
               },
               to: {
                 col: 16,
-                colOff: -margin_in_emu,
+                colOff: -MARGIN_IN_EMU,
                 row: rowNum+1,
-                rowOff: -margin_in_emu,
+                rowOff: -MARGIN_IN_EMU,
               },
             },
           });
@@ -271,7 +193,12 @@ async function processSingleRecord(
     }
 
     if (formData.hasAdditionalNotes) {
-        worksheet.cell(rowNum, 17).string(formData.techniciansNotes).style(cellStyle)
+        worksheet.cell(rowNum, 17).string(formData.techniciansNotes).style(cellStyle).style({
+            alignment: {
+                horizontal: "left",
+                vertical: "top",
+            }
+        })
         const additionalImage = await get_image_from_pocketbase(record, record.additionalImage)
         worksheet.addImage({
             image: additionalImage,
@@ -279,16 +206,16 @@ async function processSingleRecord(
             position: {
               type: 'twoCellAnchor',
               from: {
-                col: 15,
-                colOff: margin_in_emu,
+                col: 17,
+                colOff: MARGIN_IN_EMU,
                 row: rowNum,
-                rowOff: margin_in_emu * 4,
+                rowOff: CM_IN_EMU * 2,
               },
               to: {
-                col: 16,
-                colOff: -margin_in_emu,
+                col: 18,
+                colOff: -MARGIN_IN_EMU,
                 row: rowNum+1,
-                rowOff: -margin_in_emu,
+                rowOff: -MARGIN_IN_EMU,
               },
             },
           });
