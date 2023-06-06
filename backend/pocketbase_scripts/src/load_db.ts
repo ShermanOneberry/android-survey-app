@@ -5,7 +5,7 @@ import Excel from '@siema-team/spreadsheets';
 import dotenv from 'dotenv'
 dotenv.config()
 
-const pb = new PocketBase('http://127.0.0.1:8090');
+const pb = new PocketBase(process.env.POCKETBASE_URL);
 type SurveyDetailsCustomRecord = Required< {id:string} & SurveyDetailsRecord >
 
 async function load_proposed_sites(path: string) {
