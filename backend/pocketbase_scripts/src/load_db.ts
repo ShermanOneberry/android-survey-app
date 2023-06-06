@@ -1,7 +1,8 @@
 import PocketBase from 'pocketbase';
 import {Collections, SurveyDetailsRecord} from "./types/pocketbase-types.ts"
 import Excel from '@siema-team/spreadsheets';
-
+import fs from "fs"
+import path from "path"
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -43,10 +44,40 @@ async function load_proposed_sites(path: string) {
     }
 }
 
+function getAllExcelFiles(directoryPath:string) {
+    const excelFiles: string[] = [];
+  
+    // Read the contents of the directory
+    const files = fs.readdirSync(directoryPath);
+  
+    // Iterate through each file
+    files.forEach(file => {
+      const filePath = path.join(directoryPath, file);
+      const fileStat = fs.statSync(filePath);
+  
+      // Check if the file is a regular file and has .xlsx or .xls extension
+      if (fileStat.isFile() && (file.endsWith('.xlsx') || file.endsWith('.xls'))) {
+        excelFiles.push(filePath);
+      }
+  
+      // Recursively process subdirectories
+      if (fileStat.isDirectory()) {
+        excelFiles.push(...getAllExcelFiles(filePath));
+      }
+    });
+  
+    return excelFiles;
+  }
+
 async function main() {
     await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
     console.log('Authentication successful');
-    await load_proposed_sites("./proposed_sites/Batch 510 Proposed Sites (Oneberry).xlsx")
+    for (const excel_path of getAllExcelFiles("./proposed_sites")) {
+        console.log(`Processing file: \`${excel_path}\``)
+        await load_proposed_sites(excel_path)
+        console.log(`Completed file: \`${excel_path}\``)
+    }
+    
 }
 
 await main().catch((error) => {
