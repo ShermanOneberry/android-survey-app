@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "load_db": "ts-node-esm --require eslint ./src/load_db.ts",
-    "generate_report": "ts-node-esm --require eslint ./src/generate_report.ts",
-    "sync_pocketbase_typescript": "npx pocketbase-typegen --db ../pocketbase_direct/pb_data/data.db --out ./src/types/pocketbase-types.ts"
+    "build": "npx pocketbase-typegen --db ../pocketbase_direct/pb_data/data.db --out ./src/types/pocketbase-types.ts",
+    "lint": "npx eslint .",
+
+    "load_db": "ts-node-esm ./src/load_db.ts",
+    "generate_report": "ts-node-esm ./src/generate_report.ts"
   },
   "type": "module",
   "author": "",
