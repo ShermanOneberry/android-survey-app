@@ -41,7 +41,7 @@ async function get_image_from_pocketbase(
     url = pb.files.getUrl(record, imageRef, {'token': fileToken});
     buffer = await axios_get_image_buffer(url)
     if (buffer === null) { 
-        return null //TODO: Throw error
+        throw Error(`Unable to get image from '${imageRef}'`)
     }
     return buffer
 
@@ -90,7 +90,6 @@ function generateLocationDescription(report: TformData, defaultStyle: Style): (s
         {bold: true, value: distanceNumber.toString(), ...defaultStyle.font},
         {bold: false, value: " meters away", ...defaultStyle.font},
     ]
-    console.log(returnValue)
     return returnValue
 }
 
@@ -102,7 +101,6 @@ async function processSingleRecord(
     record: SurveyResultsResponse<TformData, Texpand>
 ) {
     const [/* workbook */ , worksheet, cellStyle] = template
-    console.log(record)
     const rowOffset = 5
     const originalRequest = record.expand.surveyRequest
     const rowNum = rowOffset + originalRequest.batchNumber
@@ -129,7 +127,7 @@ async function processSingleRecord(
             parse(formData.surveyTime, "HH:mm:ss.SSS", new Date(formData.surveyDate)),
             "HH:mm 'hrs'"
         )
-    ) //TODO: Make formatting match reference report
+    )
     worksheet.cell(rowNum, 10).string(formData.isFeasible ? "Yes" : "No").style(cellStyle)
 
     const reasonImageBuffer = await get_image_from_pocketbase(record, record.reasonImage)
@@ -223,8 +221,7 @@ async function processSingleRecord(
         worksheet.cell(rowNum, 17).string("N/A").style(cellStyle)
     }
     worksheet.cell(rowNum, 18).string("N/A").style(cellStyle)
-    //const reasonUrl = pb.files.getUrl(record, record.reasonImage, {'token': fileToken});
-    //row.commit()
+    console.log(`Generated row ${originalRequest.batchNumber}`)
 }
 
 async function generate_batch_report(batch_num: number){
@@ -243,9 +240,11 @@ async function generate_batch_report(batch_num: number){
     fs.writeFileSync(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`, buffer);
 }
 async function main() {
-    const authData = await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
-    console.log('Authentication successful:', authData);
-    await generate_batch_report(1)
+    await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
+    console.log('Authentication successful');
+    const batch_num = 1
+    await generate_batch_report(batch_num)
+    console.log(`Completed report generation for batch ${batch_num}`)
 }
 
 await main().catch((error) => {

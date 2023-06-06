@@ -32,16 +32,20 @@ async function load_proposed_sites(path: string) {
             suspectUnit: worksheet.getCell(`G${current_row}`).text,
             cameraFocusPoint: worksheet.getCell(`H${current_row}`).text,
         }
-        console.log(surveyDetails)
-        await pb.collection(Collections.SurveyDetails).create<SurveyDetailsCustomRecord>(surveyDetails) //TODO: Process this properly
-
+        const checkExistsResponse = await pb.collection(Collections.SurveyDetails).getList(1,1, {filter:`id='${surveyDetails.id}'`})
+        if (checkExistsResponse.totalItems != 0) {
+            await pb.collection(Collections.SurveyDetails).update<SurveyDetailsRecord>(surveyDetails.id, surveyDetails)
+        } else {
+            await pb.collection(Collections.SurveyDetails).create<SurveyDetailsCustomRecord>(surveyDetails)
+        }
+        console.log(`Processed record '${surveyDetails.id}'`)
         current_row += 1
     }
 }
 
-async function main() { //TODO: Test this
-    const authData = await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
-    console.log('Authentication successful:', authData);
+async function main() {
+    await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
+    console.log('Authentication successful');
     await load_proposed_sites("./proposed_sites/Batch 510 Proposed Sites (Oneberry).xlsx")
 }
 
