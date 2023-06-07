@@ -2,7 +2,6 @@ package com.oneberry.survey_report_app
 
 import com.oneberry.survey_report_app.data.SurveyReport
 import com.oneberry.survey_report_app.network.PocketBaseRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -12,23 +11,25 @@ import org.robolectric.RobolectricTestRunner
 import java.io.File
 import java.nio.file.Paths
 
+const val testURL: String = "http://127.0.0.1:8090/"
+
 @RunWith(RobolectricTestRunner::class)
 class ApiUnitTest {
     @Test
     fun wrapper_canGetBearerToken() = runTest {
-        val wrapper = PocketBaseRepository()
+        val wrapper = PocketBaseRepository(testURL)
         val result = wrapper.getApiToken("dummy", "password1234")
         assertNotNull(result)
     }
     @Test
     fun wrapper_canHandleBadCredentials() = runTest {
-        val wrapper = PocketBaseRepository()
+        val wrapper = PocketBaseRepository(testURL)
         val result = wrapper.getApiToken("dummy", "password")
         assertNull(result)
     }
     @Test
     fun wrapper_uploadImage() = runTest { //TODO: Figure out how to reset this
-        val wrapper = PocketBaseRepository()
+        val wrapper = PocketBaseRepository(testURL)
 
         val testImageJavaURI =
             Paths.get(

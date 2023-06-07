@@ -5,7 +5,7 @@ sealed class NavRoute(val path: String) {
     private var argNames: Array<out String> = arrayOf()
 
     object Login: NavRoute("login") {
-        val username = "username"
+        const val username = "username"
     }
 
     object Form: NavRoute("home")

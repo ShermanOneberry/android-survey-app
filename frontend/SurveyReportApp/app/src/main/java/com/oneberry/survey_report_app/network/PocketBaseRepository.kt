@@ -4,7 +4,6 @@ import android.util.Log
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
 import com.oneberry.survey_report_app.data.SurveyReport
-import com.oneberry.survey_report_app.test_util.isUnitTest
 import io.goodforgod.gson.configuration.GsonFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,13 +16,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.time.LocalDateTime
 
-class PocketBaseRepository() {
+class PocketBaseRepository(apiUrl: String) {
     private val GSON = GsonFactory().build()
-    private val API_URL =
-        if (isUnitTest()) "http://127.0.0.1:8090/"
-        else "http://10.0.2.2:8090/"
     private val retrofit = Retrofit.Builder()
-        .baseUrl(API_URL)
+        .baseUrl(apiUrl)
         .addCallAdapterFactory(NetworkResponseAdapterFactory())
         .addConverterFactory(GsonConverterFactory.create())
         .build()

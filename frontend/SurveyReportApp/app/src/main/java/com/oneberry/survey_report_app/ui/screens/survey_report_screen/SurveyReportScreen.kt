@@ -643,7 +643,7 @@ fun DateTimePicker(
     ) {
         Text(
             text = localTime?.let {
-                "Time: ${localTime?.toString()} hrs"
+                "Time: $localTime hrs"
             }?: "Must have a Time",
             color = if (localTime == null) MaterialTheme.colorScheme.error
             else Color.Unspecified

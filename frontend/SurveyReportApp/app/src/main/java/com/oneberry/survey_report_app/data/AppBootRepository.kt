@@ -1,4 +1,4 @@
-package com.oneberry.survey_report_app.data;
+package com.oneberry.survey_report_app.data
 
 import kotlinx.coroutines.flow.MutableStateFlow
 
