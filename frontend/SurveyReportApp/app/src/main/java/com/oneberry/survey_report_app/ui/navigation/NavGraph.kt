@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.oneberry.survey_report_app.ui.screens.login_screen.LoginScreen
+import com.oneberry.survey_report_app.ui.screens.past_submissions_screen.PastSubmissionsScreen
 import com.oneberry.survey_report_app.ui.screens.preview_screen.PreviewScreen
 import com.oneberry.survey_report_app.ui.screens.survey_report_screen.SurveyReportScreen
 
@@ -22,6 +23,7 @@ fun NavGraph(navController: NavHostController, contentPadding: PaddingValues) {
         addFormScreen(navController, this, contentPadding)
         addLoginScreen(navController, this, contentPadding)
         addPreviewScreen(navController, this, contentPadding)
+        addPastSubmissionsScreen(navController, this, contentPadding)
     }
 }
 
@@ -42,7 +44,10 @@ private fun addFormScreen(
             navigateToPreview = {
                 navController.navigate(NavRoute.Preview.path)
             },
-            contentPadding = contentPadding
+            navigateToPastSubmissions = {
+                navController.navigate(NavRoute.PastSubmissions.path)
+            },
+            contentPadding = contentPadding,
         )
     }
 }
@@ -77,6 +82,26 @@ fun addPreviewScreen(
 ) {
     navGraphBuilder.composable(route = NavRoute.Preview.path) {
         PreviewScreen(
+            navigateToLogin = { initialUsername:String ->
+                navController.navigate(
+                    NavRoute.Login
+                        .forArgs(NavRoute.Login.username)
+                        .withArgs(initialUsername)
+                )
+            },
+            popBackStack = { navController.popBackStack() },
+            contentPadding = contentPadding,
+        )
+    }
+}
+
+private fun addPastSubmissionsScreen(
+    navController: NavHostController,
+    navGraphBuilder: NavGraphBuilder,
+    contentPadding: PaddingValues,
+) {
+    navGraphBuilder.composable(route = NavRoute.PastSubmissions.path) {
+        PastSubmissionsScreen(
             navigateToLogin = { initialUsername:String ->
                 navController.navigate(
                     NavRoute.Login

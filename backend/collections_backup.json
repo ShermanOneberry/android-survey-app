@@ -228,7 +228,7 @@
         "indexes": [
             "CREATE UNIQUE INDEX `idx_4H5YQkF` ON `surveyResults` (`surveyRequest`)"
         ],
-        "listRule": null,
+        "listRule": "@request.auth.id = assignedUser.id",
         "viewRule": null,
         "createRule": "@request.auth.id = assignedUser.id",
         "updateRule": null,

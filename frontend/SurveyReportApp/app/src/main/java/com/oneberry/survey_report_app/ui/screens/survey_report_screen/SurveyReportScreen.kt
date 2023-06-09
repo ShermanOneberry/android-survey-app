@@ -70,6 +70,7 @@ fun SurveyReportScreen(
         viewModel(factory = SurveyReportViewModel.Factory),
     navigateToLogin: (String) -> Unit,
     navigateToPreview: () -> Unit,
+    navigateToPastSubmissions: () -> Unit,
     contentPadding: PaddingValues,
 ) {
     val surveyReportUiState by surveyReportViewModel.surveyState.collectAsState()
@@ -118,6 +119,10 @@ fun SurveyReportScreen(
         if (possibleUsername != null) {
             navigateToLogin(possibleUsername)
         } else {
+            //TODO: Figure out why this seems to keep triggering now,
+            // and user creds are no longer persisting
+            // Check if this has always been the case in the main branch, or just appeared in this
+            // branch. If the former, do regression testing until we debug this
             navigateToLogin("")
         }
     }
@@ -162,6 +167,13 @@ fun SurveyReportScreen(
                     Text("Logout")
                 }
             }
+
+            Divider()
+
+            Button(onClick = { navigateToPastSubmissions() }) {
+                Text("View previous submissions")
+            }
+
         } else {
             Button(onClick = { navigateToLogin("") }) {
                 Text("Login")

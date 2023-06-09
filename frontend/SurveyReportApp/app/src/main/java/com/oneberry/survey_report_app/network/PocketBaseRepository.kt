@@ -98,4 +98,27 @@ class PocketBaseRepository(apiUrl: String) {
             }
         }
     }
+
+    suspend fun getPastSubmissionsList(
+        bearerToken: String,
+        userId: String,
+        page: Int,
+    ): GetSubmissionsApiBody? {
+        return withContext(Dispatchers.IO) {
+            val response = service.getPastSubmissions(
+                bearerToken,
+                page,
+                sort = "-updated,-surveyRequest",
+                filter = "assignedUser.id=\"$userId\"",
+                expand = "surveyRequest",
+            )
+            when (response) {
+                is NetworkResponse.Success -> return@withContext response.body
+                is NetworkResponse.Error -> {
+                    Log.d("debug error", response.error.toString())
+                    return@withContext null
+                }
+            }
+        }
+    }
 }

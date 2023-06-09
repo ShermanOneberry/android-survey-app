@@ -12,6 +12,8 @@ sealed class NavRoute(val path: String) {
 
     object Preview: NavRoute("preview")
 
+    object PastSubmissions: NavRoute("past_submissions")
+
     // build navigation path (for screen navigation)
     fun forArgs(vararg args: String):NavRoute {
         argNames = args
