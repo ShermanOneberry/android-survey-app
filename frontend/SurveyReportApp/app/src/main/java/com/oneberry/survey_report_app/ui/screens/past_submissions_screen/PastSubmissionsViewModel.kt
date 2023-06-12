@@ -87,7 +87,6 @@ class PastSubmissionsViewModel(
             }
             val pastSubmissionsData = backendAPI.getPastSubmissionsList(
                 nonNullCredentials.token,
-                nonNullCredentials.id,
                 page,
             )
             if (pastSubmissionsData == null) {

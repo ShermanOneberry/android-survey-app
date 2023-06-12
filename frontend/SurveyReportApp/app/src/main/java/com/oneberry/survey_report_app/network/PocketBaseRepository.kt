@@ -101,7 +101,6 @@ class PocketBaseRepository(apiUrl: String) {
 
     suspend fun getPastSubmissionsList(
         bearerToken: String,
-        userId: String,
         page: Int,
     ): GetSubmissionsApiBody? {
         return withContext(Dispatchers.IO) {
@@ -109,7 +108,7 @@ class PocketBaseRepository(apiUrl: String) {
                 bearerToken,
                 page,
                 sort = "-updated,-surveyRequest",
-                filter = "assignedUser.id=\"$userId\"",
+                filter = "", //TODO: Allow filter by block and street
                 expand = "surveyRequest",
             )
             when (response) {
