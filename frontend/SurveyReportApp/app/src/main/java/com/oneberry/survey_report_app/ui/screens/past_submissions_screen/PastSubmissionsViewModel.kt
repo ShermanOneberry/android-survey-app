@@ -8,9 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
 import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
+import com.oneberry.survey_report_app.network.ItemsData
 import com.oneberry.survey_report_app.network.PocketBaseRepository
-import com.oneberry.survey_report_app.network.SurveyRequestId
-import com.oneberry.survey_report_app.ui.screens.preview_screen.PreviewNavRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -90,18 +89,46 @@ class PastSubmissionsViewModel(
             if (pastSubmissionsData == null) {
                 _toastMessage.emit("Something went wrong while loading.")
             } else {
-                _pastSubmissions.update {
+                var currentMaxBatchNumber = pastSubmissions.value?.latestBatchNumber
+                if (currentMaxBatchNumber == null) {
+                    currentMaxBatchNumber =
+                        backendAPI.getMaxBatchNumber(nonNullCredentials.token)
+                    if (currentMaxBatchNumber == null) {
+                        _toastMessage.emit("Something went wrong while loading.")
+                        return@launch
+                    }
+                }
+                _pastSubmissions.update { it ->
                     PastSubmissionsState(
                         page = pastSubmissionsData.page,
                         perPage = pastSubmissionsData.perPage,
-                        totalItems = pastSubmissionsData.totalItems,
                         totalPages = pastSubmissionsData.totalPages,
-                        items = pastSubmissionsData.items.map{
-                            it.expand.surveyRequest
-                        }
+                        totalItems = pastSubmissionsData.totalItems,
+                        items = pastSubmissionsData.items.map {item ->
+                            AugmentedItemData(
+                                item = item,
+                                sameUser = item.assignedUser == nonNullCredentials.id
+                            )
+                        },
+
+                        latestBatchNumber = currentMaxBatchNumber
                     )
                 }
             }
+        }
+    }
+    fun editSubmission(item: ItemsData) {
+        viewModelScope.launch {
+            val surveyRequest = item.expand.surveyRequest
+            surveyReportRepository.mutableSurveyState.update {
+                item.formData.copy(
+                    isNewReport = false,
+                    batchNum = surveyRequest.batchNumber.toString(),
+                    intraBatchId = surveyRequest.batchID.toString(),
+                    //TODO Figure out what to do about images
+                )
+            }
+            _navRequest.emit(PastSubmissionsNavRequest.Back)
         }
     }
 }

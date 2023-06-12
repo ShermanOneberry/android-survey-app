@@ -7,6 +7,8 @@ import java.time.LocalTime
 
 data class SurveyReport(
     @Transient
+    val isNewReport: Boolean = true,
+    @Transient
     val batchNum: String = "1",
     @Transient
     val intraBatchId: String = "1",

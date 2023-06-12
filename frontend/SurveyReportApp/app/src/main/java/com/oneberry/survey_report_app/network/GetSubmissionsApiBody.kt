@@ -1,5 +1,7 @@
 package com.oneberry.survey_report_app.network
 
+import com.oneberry.survey_report_app.data.SurveyReport
+
 data class GetSubmissionsApiBody (
     val page: Int,
     val perPage: Int,
@@ -8,6 +10,14 @@ data class GetSubmissionsApiBody (
     val items: List<ItemsData>
 )
 data class ItemsData (
+    val id: String,
+    val assignedUser: String,
+
+    val formData: SurveyReport,
+
+    val reasonImage: String,
+    val additionalImage: String,
+
     val expand: Expand
 )
 data class Expand (

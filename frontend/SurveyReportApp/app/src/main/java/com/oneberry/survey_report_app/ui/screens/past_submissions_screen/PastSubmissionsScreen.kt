@@ -98,15 +98,17 @@ fun PastSubmissionsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text("Submission ${it.batchID} for Batch ${it.batchNumber}")
+                val surveyReq = it.item.expand.surveyRequest
+                Text("Submission ${surveyReq.batchID} for Batch ${surveyReq.batchNumber}")
                 Button(
                     onClick = {/*TODO*/}
                 ){
                     Text("View")
                 }
                 Button(
-                    onClick = {/*TODO*/},
-                    enabled = true //TODO: Set false if not from latest batch
+                    onClick = {pastSubmissionsViewModel.editSubmission(it.item)},
+                    enabled = it.sameUser &&
+                            surveyReq.batchNumber == pastSubmissions.latestBatchNumber
                 ){
                     Text("Edit")
                 }
