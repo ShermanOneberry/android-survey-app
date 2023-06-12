@@ -107,9 +107,12 @@ fun SurveyReportScreen(
             }
     }
     val appHasLoaded by surveyReportViewModel.appHasLoaded.collectAsState()
-    LaunchedEffect(Unit) {
+    LaunchedEffect(credentials) {
         if (appHasLoaded) {
             return@LaunchedEffect
+        }
+        if (credentials == null) {
+            return@LaunchedEffect //Still checking for credentials
         }
         if (credentials?.tryGetNotNullCredentials() != null) {
             surveyReportViewModel.setAppBootAsLoaded()
@@ -119,10 +122,6 @@ fun SurveyReportScreen(
         if (possibleUsername != null) {
             navigateToLogin(possibleUsername)
         } else {
-            //TODO: Figure out why this seems to keep triggering now,
-            // and user creds are no longer persisting
-            // Check if this has always been the case in the main branch, or just appeared in this
-            // branch. If the former, do regression testing until we debug this
             navigateToLogin("")
         }
     }
