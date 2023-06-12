@@ -56,6 +56,87 @@
         }
     },
     {
+        "id": "22tej05klv78p5h",
+        "name": "surveyResults",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "hcaimpsw",
+                "name": "surveyRequest",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "9jhzcgy0yo8egqd",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": []
+                }
+            },
+            {
+                "id": "9ihtlclg",
+                "name": "assignedUser",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": []
+                }
+            },
+            {
+                "id": "7v5eeat1",
+                "name": "formData",
+                "type": "json",
+                "system": false,
+                "required": true,
+                "options": {}
+            },
+            {
+                "id": "eafkn8cy",
+                "name": "reasonImage",
+                "type": "file",
+                "system": false,
+                "required": true,
+                "options": {
+                    "maxSelect": 1,
+                    "maxSize": 5242880,
+                    "mimeTypes": [],
+                    "thumbs": [],
+                    "protected": true
+                }
+            },
+            {
+                "id": "4hbougp8",
+                "name": "additionalImage",
+                "type": "file",
+                "system": false,
+                "required": false,
+                "options": {
+                    "maxSelect": 1,
+                    "maxSize": 5242880,
+                    "mimeTypes": [],
+                    "thumbs": [],
+                    "protected": true
+                }
+            }
+        ],
+        "indexes": [
+            "CREATE UNIQUE INDEX `idx_4H5YQkF` ON `surveyResults` (`surveyRequest`)"
+        ],
+        "listRule": "@request.auth.id != \"\"",
+        "viewRule": null,
+        "createRule": "@request.auth.id = assignedUser.id",
+        "updateRule": null,
+        "deleteRule": null,
+        "options": {}
+    },
+    {
         "id": "9jhzcgy0yo8egqd",
         "name": "surveyDetails",
         "type": "base",
@@ -147,90 +228,9 @@
         "indexes": [
             "CREATE UNIQUE INDEX `idx_J7bB7iQ` ON `surveyDetails` (\n  `batchNumber`,\n  `batchID`\n)"
         ],
-        "listRule": null,
+        "listRule": "@request.auth.id != \"\"",
         "viewRule": "@request.auth.id != \"\"",
         "createRule": null,
-        "updateRule": null,
-        "deleteRule": null,
-        "options": {}
-    },
-    {
-        "id": "22tej05klv78p5h",
-        "name": "surveyResults",
-        "type": "base",
-        "system": false,
-        "schema": [
-            {
-                "id": "hcaimpsw",
-                "name": "surveyRequest",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "options": {
-                    "collectionId": "9jhzcgy0yo8egqd",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": []
-                }
-            },
-            {
-                "id": "9ihtlclg",
-                "name": "assignedUser",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "options": {
-                    "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": []
-                }
-            },
-            {
-                "id": "7v5eeat1",
-                "name": "formData",
-                "type": "json",
-                "system": false,
-                "required": true,
-                "options": {}
-            },
-            {
-                "id": "eafkn8cy",
-                "name": "reasonImage",
-                "type": "file",
-                "system": false,
-                "required": true,
-                "options": {
-                    "maxSelect": 1,
-                    "maxSize": 5242880,
-                    "mimeTypes": [],
-                    "thumbs": [],
-                    "protected": true
-                }
-            },
-            {
-                "id": "4hbougp8",
-                "name": "additionalImage",
-                "type": "file",
-                "system": false,
-                "required": false,
-                "options": {
-                    "maxSelect": 1,
-                    "maxSize": 5242880,
-                    "mimeTypes": [],
-                    "thumbs": [],
-                    "protected": true
-                }
-            }
-        ],
-        "indexes": [
-            "CREATE UNIQUE INDEX `idx_4H5YQkF` ON `surveyResults` (`surveyRequest`)"
-        ],
-        "listRule": "@request.auth.id != \"\"",
-        "viewRule": null,
-        "createRule": "@request.auth.id = assignedUser.id",
         "updateRule": null,
         "deleteRule": null,
         "options": {}
