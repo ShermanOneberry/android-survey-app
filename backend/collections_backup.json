@@ -148,7 +148,7 @@
             "CREATE UNIQUE INDEX `idx_J7bB7iQ` ON `surveyDetails` (\n  `batchNumber`,\n  `batchID`\n)"
         ],
         "listRule": null,
-        "viewRule": null,
+        "viewRule": "@request.auth.id != \"\"",
         "createRule": null,
         "updateRule": null,
         "deleteRule": null,

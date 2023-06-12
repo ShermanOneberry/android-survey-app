@@ -79,7 +79,11 @@ fun PastSubmissionsScreen(
     LazyColumn(
         modifier = Modifier
             .padding(contentPadding) //Margin
-            .verticalScroll(rememberScrollState())
+            //verticalScroll() causes an error somehow.
+            // java.lang.IllegalStateException: Vertically scrollable component was measured with
+            // an infinity maximum height constraints, which is disallowed.
+            // TODO: Check scroll still works without this
+            //verticalScroll(rememberScrollState())
             .padding(mediumPadding), //Padding
         verticalArrangement = Arrangement.spacedBy(
             space = mediumPadding,
