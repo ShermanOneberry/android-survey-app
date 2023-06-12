@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -98,7 +99,17 @@ fun PastSubmissionsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text("Submission ${it.batchID} for Batch ${it.batchNumber}")
-                //TODO: Add preview, edit button
+                Button(
+                    onClick = {/*TODO*/}
+                ){
+                    Text("View")
+                }
+                Button(
+                    onClick = {/*TODO*/},
+                    enabled = true //TODO: Set false if not from latest batch
+                ){
+                    Text("Edit")
+                }
             }
         }
     }
