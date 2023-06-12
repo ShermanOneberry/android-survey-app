@@ -21,7 +21,7 @@ class PocketBaseRepository(apiUrl: String) {
     private val retrofit = Retrofit.Builder()
         .baseUrl(apiUrl)
         .addCallAdapterFactory(NetworkResponseAdapterFactory())
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(GSON))
         .build()
     private val service: PocketBaseAPI = retrofit.create(PocketBaseAPI::class.java)
 
