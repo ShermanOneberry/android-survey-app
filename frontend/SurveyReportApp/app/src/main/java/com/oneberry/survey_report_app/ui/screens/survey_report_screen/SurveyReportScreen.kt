@@ -181,20 +181,31 @@ fun SurveyReportScreen(
 
         Divider()
 
-        TextInputTemplate(
-            fieldTitle = "Batch number",
-            fieldInput = surveyReportUiState.batchNum,
-            isFieldValid = surveyReportUiState.batchNumValid(),
-            onInputChange = { surveyReportViewModel.updateBatchNum(it) },
-            errorMessage = surveyReportUiState.batchNumError(),
-        )
-        TextInputTemplate(
-            fieldTitle = "Survey number for batch",
-            fieldInput = surveyReportUiState.intraBatchId,
-            isFieldValid = surveyReportUiState.intraBatchIdValid(),
-            onInputChange = { surveyReportViewModel.updateIntraBatchId(it) },
-            errorMessage = surveyReportUiState.intraBatchIdError(),
-        )
+        if (surveyReportUiState.isNewReport) {
+            TextInputTemplate(
+                fieldTitle = "Batch number",
+                fieldInput = surveyReportUiState.batchNum,
+                isFieldValid = surveyReportUiState.batchNumValid(),
+                onInputChange = { surveyReportViewModel.updateBatchNum(it) },
+                errorMessage = surveyReportUiState.batchNumError(),
+            )
+            TextInputTemplate(
+                fieldTitle = "Survey number for batch",
+                fieldInput = surveyReportUiState.intraBatchId,
+                isFieldValid = surveyReportUiState.intraBatchIdValid(),
+                onInputChange = { surveyReportViewModel.updateIntraBatchId(it) },
+                errorMessage = surveyReportUiState.intraBatchIdError(),
+            )
+            //TODO: Add reset button with confirmation dialog
+        } else {
+            Text("Editing Survey ${surveyReportUiState.intraBatchId} " +
+                    "for Batch ${surveyReportUiState.batchNum}")
+            Button(
+                onClick = {/*TODO*/} //TODO: Make sure this has confirmation dialog
+            ) {
+                Text("Create new survey report instead")
+            }
+        }
 
         Divider()
         Text("Survey DateTime")
