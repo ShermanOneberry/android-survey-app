@@ -57,8 +57,6 @@ class PastSubmissionsViewModel(
     val pastSubmissions = _pastSubmissions.asStateFlow()
 
     init {
-        //TODO: Figure out why this causes a crash when it gets a valid item
-        //      (Probably just means I should call this from LaunchedEffect, try that first)
         updatePastSubmissions(1)
     }
     private fun updatePastSubmissions(page: Int) {
