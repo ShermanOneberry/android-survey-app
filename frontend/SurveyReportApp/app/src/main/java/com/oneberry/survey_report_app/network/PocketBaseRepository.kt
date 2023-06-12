@@ -120,4 +120,19 @@ class PocketBaseRepository(apiUrl: String) {
             }
         }
     }
+    suspend fun getMaxBatchNumber(
+        bearerToken: String
+    ): Int? {
+        return withContext(Dispatchers.IO) {
+            when (val response = service.getMaxBatchNum(bearerToken)) {
+                is NetworkResponse.Success -> {
+                    val firstItem = response.body.items.getOrNull(0)
+                    return@withContext firstItem?.batchNum ?: 0
+                }
+                is NetworkResponse.Error -> {
+                    return@withContext null
+                }
+            }
+        }
+    }
 }

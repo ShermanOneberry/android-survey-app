@@ -54,4 +54,9 @@ interface PocketBaseAPI {
 
     ): NetworkResponse<GetSubmissionsApiBody, ErrorBody>
 
+    @GET("/api/collections/surveyDetails/records?page=1&sort=-batchNumber&perPage=1")
+    suspend fun getMaxBatchNum(
+        @Header("Authorization") bearerToken: String,
+    ): NetworkResponse<GetMaxBatchNumApiBody, ErrorBody>
+
 }
