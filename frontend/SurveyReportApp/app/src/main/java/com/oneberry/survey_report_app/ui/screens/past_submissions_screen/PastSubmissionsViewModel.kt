@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.EditOnlyImages
 import com.oneberry.survey_report_app.data.NotNullUserCredentials
 import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
@@ -124,13 +125,44 @@ class PastSubmissionsViewModel(
     }
     fun editSubmission(item: ItemsData) {
         viewModelScope.launch {
+            val nonNullCredentials = attemptGetCredentials() ?: return@launch
             val surveyRequest = item.expand.surveyRequest
+            val reasonImage = backendAPI.getImage(
+                nonNullCredentials.token,
+                item.collectionId,
+                item.id,
+                item.reasonImage
+            )
+            if (reasonImage == null) {
+                _toastMessage.emit("Something went wrong while attempting to load images.")
+                return@launch
+            }
+            val extraImage =
+                if (item.additionalImage.isBlank()) null
+                else {
+                    val image = backendAPI.getImage(
+                        nonNullCredentials.token,
+                        item.collectionId,
+                        item.id,
+                        item.reasonImage
+                    )
+                    if (image == null) {
+                        _toastMessage.emit(
+                            "Something went wrong while attempting to load images."
+                        )
+                        return@launch
+                    }
+                    image //To extraImage
+                }
             surveyReportRepository.mutableSurveyState.update {
                 item.formData.copy(
                     isNewReport = false,
                     batchNum = surveyRequest.batchNumber.toString(),
                     intraBatchId = surveyRequest.batchID.toString(),
-                    //TODO Figure out what to do about images
+                    editOnlyImages = EditOnlyImages(
+                        reasonImage = reasonImage,
+                        extraImage = extraImage
+                    )
                 )
             }
             _navRequest.emit(PastSubmissionsNavRequest.Back)

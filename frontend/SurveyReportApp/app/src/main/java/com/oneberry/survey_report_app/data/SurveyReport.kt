@@ -1,5 +1,6 @@
 package com.oneberry.survey_report_app.data
 
+import android.graphics.Bitmap
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
@@ -8,6 +9,8 @@ import java.time.LocalTime
 data class SurveyReport(
     @Transient
     val isNewReport: Boolean = true,
+    @Transient
+    val editOnlyImages: EditOnlyImages? = null,
     @Transient
     val batchNum: String = "1",
     @Transient
@@ -194,3 +197,8 @@ enum class GroundType(val value: String){
     GRASS_PATCH("Grass patch"),
     OTHER("<Other>")
 }
+
+data class EditOnlyImages(
+    val reasonImage: Bitmap,
+    val extraImage: Bitmap?,
+)

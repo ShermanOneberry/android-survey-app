@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.File
 import java.nio.file.Paths
 
-const val testURL: String = "http://127.0.0.1:8090/"
+const val testURL: String = "http://127.0.0.1:8090"
 
 @RunWith(RobolectricTestRunner::class)
 class ApiUnitTest {

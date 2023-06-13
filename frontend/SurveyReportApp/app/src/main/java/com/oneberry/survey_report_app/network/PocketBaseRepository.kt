@@ -1,5 +1,7 @@
 package com.oneberry.survey_report_app.network
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
@@ -13,12 +15,15 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.time.LocalDateTime
 
+
 class PocketBaseRepository(apiUrl: String) {
+    private val apiUrl = apiUrl
     private val GSON = GsonFactory().build()
     private val retrofit = Retrofit.Builder()
         .baseUrl(apiUrl)
@@ -135,6 +140,31 @@ class PocketBaseRepository(apiUrl: String) {
                     return@withContext null
                 }
             }
+        }
+    }
+    suspend fun getImage(
+        bearerToken: String,
+        collectionId: String,
+        recordId: String,
+        imageFilename: String,
+    ): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            val fileToken = when(
+                val response = service.getFileToken(bearerToken)
+            ) {
+                is NetworkResponse.Error -> {
+                    return@withContext null
+                }
+                is NetworkResponse.Success -> {
+                    response.body.token
+                }
+            }
+            val imageUrl =
+                "$apiUrl/api/files/$collectionId/$recordId/$imageFilename" +
+                        "?token=$fileToken"
+            val body = service.fetchImage(imageUrl).execute().body() ?: return@withContext null
+            val bytes = body.bytes()
+            return@withContext BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         }
     }
 }
