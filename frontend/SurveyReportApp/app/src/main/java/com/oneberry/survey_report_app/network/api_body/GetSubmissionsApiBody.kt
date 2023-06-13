@@ -1,4 +1,4 @@
-package com.oneberry.survey_report_app.network
+package com.oneberry.survey_report_app.network.api_body
 
 import com.oneberry.survey_report_app.data.SurveyReport
 
@@ -10,6 +10,8 @@ data class GetSubmissionsApiBody (
     val items: List<ItemsData>
 )
 data class ItemsData (
+    val collectionId: String,
+
     val id: String,
     val assignedUser: String,
 

@@ -1,4 +1,4 @@
-package com.oneberry.survey_report_app.network
+package com.oneberry.survey_report_app.network.api_body
 
 import java.time.LocalDateTime
 

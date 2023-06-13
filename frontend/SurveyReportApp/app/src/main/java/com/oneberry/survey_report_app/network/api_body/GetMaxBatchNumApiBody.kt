@@ -1,6 +1,4 @@
-package com.oneberry.survey_report_app.network
-
-import com.oneberry.survey_report_app.data.SurveyReport
+package com.oneberry.survey_report_app.network.api_body
 
 data class GetMaxBatchNumApiBody (
     val items: List<BatchNumItems>

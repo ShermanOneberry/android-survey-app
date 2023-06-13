@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
 import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
-import com.oneberry.survey_report_app.network.ItemsData
+import com.oneberry.survey_report_app.network.api_body.ItemsData
 import com.oneberry.survey_report_app.network.PocketBaseRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

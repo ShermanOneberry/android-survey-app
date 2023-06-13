@@ -2,6 +2,11 @@ package com.oneberry.survey_report_app.network
 
 
 import com.haroldadmin.cnradapter.NetworkResponse
+import com.oneberry.survey_report_app.network.api_body.AuthApiBody
+import com.oneberry.survey_report_app.network.api_body.GetFileTokenApiBody
+import com.oneberry.survey_report_app.network.api_body.GetMaxBatchNumApiBody
+import com.oneberry.survey_report_app.network.api_body.GetSubmissionsApiBody
+import com.oneberry.survey_report_app.network.api_body.PostFormApiBody
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.Field

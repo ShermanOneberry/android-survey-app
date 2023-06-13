@@ -1,6 +1,6 @@
 package com.oneberry.survey_report_app.ui.screens.past_submissions_screen
 
-import com.oneberry.survey_report_app.network.ItemsData
+import com.oneberry.survey_report_app.network.api_body.ItemsData
 
 data class PastSubmissionsState (
     val page: Int,
