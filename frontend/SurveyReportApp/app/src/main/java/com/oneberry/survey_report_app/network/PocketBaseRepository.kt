@@ -129,7 +129,7 @@ class PocketBaseRepository(apiUrl: String) {
             when (val response = service.getMaxBatchNum(bearerToken)) {
                 is NetworkResponse.Success -> {
                     val firstItem = response.body.items.getOrNull(0)
-                    return@withContext firstItem?.batchNum ?: 0
+                    return@withContext firstItem?.batchNumber ?: 0
                 }
                 is NetworkResponse.Error -> {
                     return@withContext null

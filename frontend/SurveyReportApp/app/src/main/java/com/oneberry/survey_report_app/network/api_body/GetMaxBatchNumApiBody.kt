@@ -4,5 +4,5 @@ data class GetMaxBatchNumApiBody (
     val items: List<BatchNumItems>
 )
 data class BatchNumItems (
-    val batchNum: Int
+    val batchNumber: Int
 )
