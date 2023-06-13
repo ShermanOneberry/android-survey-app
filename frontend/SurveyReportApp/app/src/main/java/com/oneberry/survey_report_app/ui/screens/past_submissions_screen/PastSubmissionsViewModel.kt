@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.NotNullUserCredentials
 import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.api_body.ItemsData
@@ -58,30 +59,34 @@ class PastSubmissionsViewModel(
     init {
         updatePastSubmissions(1)
     }
+    private suspend fun attemptGetCredentials(): NotNullUserCredentials? {
+        val credentials = credentialFlow.first()
+        if (credentials.username == null) {
+            _toastMessage.emit("Error: Login credentials missing")
+            _navRequest.emit(PastSubmissionsNavRequest.Login)
+            return null
+        }
+        val nonNullCredentials =
+            credentials.tryGetNotNullCredentials()
+        if (nonNullCredentials == null) {
+            _toastMessage.emit("Error: Login credentials missing")
+            _navRequest.emit(
+                PastSubmissionsNavRequest.ReLogin(credentials.username)
+            )
+            return null
+        }
+        if (nonNullCredentials.isNotExpired(LocalDateTime.now(),false)) {
+            _toastMessage.emit("You need to login again, your session has expired.")
+            _navRequest.emit(
+                PastSubmissionsNavRequest.ReLogin(credentials.username)
+            )
+            return null
+        }
+        return nonNullCredentials
+    }
     private fun updatePastSubmissions(page: Int) {
         viewModelScope.launch {
-            val credentials = credentialFlow.first()
-            if (credentials.username == null) {
-                _toastMessage.emit("Error: Login credentials missing")
-                _navRequest.emit(PastSubmissionsNavRequest.Login)
-                return@launch
-            }
-            val nonNullCredentials =
-                credentials.tryGetNotNullCredentials()
-            if (nonNullCredentials == null) {
-                _toastMessage.emit("Error: Login credentials missing")
-                _navRequest.emit(
-                    PastSubmissionsNavRequest.ReLogin(credentials.username)
-                )
-                return@launch
-            }
-            if (nonNullCredentials.isNotExpired(LocalDateTime.now(),false)) {
-                _toastMessage.emit("You need to login again, your session has expired.")
-                _navRequest.emit(
-                    PastSubmissionsNavRequest.ReLogin(credentials.username)
-                )
-                return@launch
-            }
+            val nonNullCredentials = attemptGetCredentials() ?: return@launch
             val pastSubmissionsData = backendAPI.getPastSubmissionsList(
                 nonNullCredentials.token,
                 page,
