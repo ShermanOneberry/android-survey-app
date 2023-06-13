@@ -1,5 +1,6 @@
 package com.oneberry.survey_report_app.ui.screens.past_submissions_screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
@@ -31,6 +33,18 @@ fun PastSubmissionsScreen(
     contentPadding: PaddingValues,
 ) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        pastSubmissionsViewModel
+            .toastMessage
+            .collect { message ->
+                Toast.makeText(
+                    context,
+                    message,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+    }
     LaunchedEffect(Unit) {
         pastSubmissionsViewModel
             .navRequest
