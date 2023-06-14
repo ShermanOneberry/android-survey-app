@@ -12,12 +12,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -25,8 +22,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.shapes
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -40,20 +35,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
 import com.oneberry.survey_report_app.data.GroundType
 import com.oneberry.survey_report_app.data.LocationType
+import com.oneberry.survey_report_app.ui.composables.TextInputTemplate
 import com.oneberry.survey_report_app.util.getFile
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
@@ -505,56 +497,6 @@ fun GroundOptionMenuSelection(
             }
         }
     }
-}
-@Preview
-@Composable
-fun TextInputPreview(){
-    var inputText by remember { mutableStateOf("") }
-    TextInputTemplate(
-        fieldTitle = "Field Name",
-        fieldInput = inputText,
-        isFieldValid = (inputText == "Valid"),
-        isFinalInput = true,
-        onInputChange = {inputText = it},
-        errorMessage = if (inputText == "Valid") null else "Text must be 'Valid'"
-    )
-}
-@Composable
-fun TextInputTemplate(
-    fieldTitle: String,
-    fieldInput: String,
-    isFieldValid: Boolean,
-    errorMessage: String?,
-    onInputChange: (String) -> Unit,
-    isFinalInput: Boolean = false,
-    isMultiLine: Boolean = false,
-) {
-    val focusManager = LocalFocusManager.current
-    OutlinedTextField(
-        value = fieldInput,
-        singleLine = !isMultiLine,
-        shape = shapes.large,
-        modifier =
-            if (isMultiLine)
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(1.dp, Dp.Infinity)
-            else Modifier.fillMaxWidth(),
-        //colors = TextFieldDefaults.textFieldColors(containerColor = colorScheme.surface),
-        onValueChange = onInputChange,
-        label = {Text(fieldTitle)},
-        isError = !isFieldValid,
-        supportingText = if (errorMessage == null) null else { {Text(errorMessage)} },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = if (isFinalInput) ImeAction.Done else ImeAction.Next
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { focusManager.clearFocus() },
-            onNext = {
-                focusManager.moveFocus(FocusDirection.Down)
-            }
-        )
-    )
 }
 @Preview
 @Composable
