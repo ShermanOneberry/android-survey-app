@@ -109,6 +109,9 @@ private fun addPastSubmissionsScreen(
                         .withArgs(initialUsername)
                 )
             },
+            navigateToPreview = {
+                navController.navigate(NavRoute.Preview.path)
+            },
             popBackStack = { navController.popBackStack() },
             contentPadding = contentPadding,
         )

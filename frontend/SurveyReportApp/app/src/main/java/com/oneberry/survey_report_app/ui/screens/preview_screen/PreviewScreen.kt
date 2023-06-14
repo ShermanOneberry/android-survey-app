@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,7 +44,10 @@ fun PreviewScreen(
 ) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val context = LocalContext.current
-    val report = previewViewModel.surveyState.collectAsState().value
+    val submittableReport = previewViewModel.surveyState.collectAsState().value
+    val viewOnlyReport = previewViewModel.viewOnlySurveyState.collectAsState().value
+    val report = viewOnlyReport ?: submittableReport
+    val isViewOnly = viewOnlyReport != null
     LaunchedEffect(Unit) {
         previewViewModel
             .toastMessage
@@ -72,6 +76,9 @@ fun PreviewScreen(
                 }
             }
     }
+    LaunchedEffect(Unit) {
+        previewViewModel.attemptLoadViewOnlySurvey()
+    }
     Column(
         modifier = Modifier
             .padding(contentPadding) //Margin
@@ -83,9 +90,24 @@ fun PreviewScreen(
             alignment = Alignment.CenterVertically
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
-    ) {//TODO: Check preview
+    ) {
+        val loadingComplete = previewViewModel.viewOnlySurveyLoadedState.collectAsState().value
+        if (!loadingComplete) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "Loading...",
+                    style = typography.titleLarge,
+                )
+            }
+            //TODO: Maybe consider adding a 'proper' loading screen instead?
+            return //Suppress rendering
+        }
         Text(
-            text = "Preview",
+            text = if (isViewOnly) "Review" else "Preview",
             style = typography.titleLarge,
         )
         Divider()
@@ -150,10 +172,18 @@ fun PreviewScreen(
             )
         }
         Divider()
-        Button(
-            onClick = { previewViewModel.triggerSubmission() }
-        ) {
-            Text(text = "Submit")
+        if (isViewOnly) {
+            Button(
+                onClick = { popBackStack() }
+            ) {
+                Text("Back to Past Submissions")
+            }
+        } else {
+            Button(
+                onClick = { previewViewModel.triggerSubmission() }
+            ) {
+                Text(text = "Submit")
+            }
         }
     }
 }

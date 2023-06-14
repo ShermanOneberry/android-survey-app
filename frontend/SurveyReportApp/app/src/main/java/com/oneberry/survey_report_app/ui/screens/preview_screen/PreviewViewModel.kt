@@ -6,13 +6,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
+import com.oneberry.survey_report_app.data.SurveyReport
 import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.PocketBaseRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -42,6 +45,8 @@ class PreviewViewModel (
     }
     //Survey data
     val surveyState = surveyReportRepository.mutableSurveyState.asStateFlow()
+    val viewOnlySurveyState = MutableStateFlow<SurveyReport?>(null)
+    val viewOnlySurveyLoadedState = MutableStateFlow(false)
     //Credentials data
     private val credentialFlow = userCredentialsRepository.credentialsFlow
     //Toast emitter
@@ -50,6 +55,14 @@ class PreviewViewModel (
     //Navigation
     private val _navRequest = MutableSharedFlow<PreviewNavRequest>()
     val navRequest = _navRequest.asSharedFlow()
+    //Data loading
+    fun attemptLoadViewOnlySurvey() {
+        viewOnlySurveyState.update {
+            surveyReportRepository.mutableReviewPastSubmissionState.value
+        }
+        surveyReportRepository.mutableReviewPastSubmissionState.update { null }
+        viewOnlySurveyLoadedState.update { true }
+    }
     //Hooks
     fun triggerSubmission() {
         viewModelScope.launch {

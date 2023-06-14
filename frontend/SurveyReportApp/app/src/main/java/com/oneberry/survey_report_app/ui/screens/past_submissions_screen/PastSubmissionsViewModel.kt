@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
 import com.oneberry.survey_report_app.data.EditOnlyData
 import com.oneberry.survey_report_app.data.NotNullUserCredentials
+import com.oneberry.survey_report_app.data.SurveyReport
 import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
 import com.oneberry.survey_report_app.network.api_body.ItemsData
@@ -123,49 +124,62 @@ class PastSubmissionsViewModel(
             }
         }
     }
+    private suspend fun preparePastSubmission(item: ItemsData): SurveyReport? {
+        val nonNullCredentials = attemptGetCredentials() ?: return null
+        val surveyRequest = item.expand.surveyRequest
+        val reasonImage = backendAPI.getImage(
+            nonNullCredentials.token,
+            item.collectionId,
+            item.id,
+            item.reasonImage
+        )
+        if (reasonImage == null) {
+            _toastMessage.emit("Something went wrong while attempting to load images.")
+            return null
+        }
+        val extraImage =
+            if (item.additionalImage.isBlank()) null
+            else {
+                val image = backendAPI.getImage(
+                    nonNullCredentials.token,
+                    item.collectionId,
+                    item.id,
+                    item.reasonImage
+                )
+                if (image == null) {
+                    _toastMessage.emit(
+                        "Something went wrong while attempting to load images."
+                    )
+                    return null
+                }
+                image //To extraImage
+            }
+        return item.formData.copy(
+            batchNum = surveyRequest.batchNumber.toString(),
+            intraBatchId = surveyRequest.batchID.toString(),
+            editOnlyData = EditOnlyData(
+                recordId = item.id,
+                reasonImage = reasonImage,
+                extraImage = extraImage
+            )
+        )
+    }
     fun editSubmission(item: ItemsData) {
         viewModelScope.launch {
-            val nonNullCredentials = attemptGetCredentials() ?: return@launch
-            val surveyRequest = item.expand.surveyRequest
-            val reasonImage = backendAPI.getImage(
-                nonNullCredentials.token,
-                item.collectionId,
-                item.id,
-                item.reasonImage
-            )
-            if (reasonImage == null) {
-                _toastMessage.emit("Something went wrong while attempting to load images.")
-                return@launch
-            }
-            val extraImage =
-                if (item.additionalImage.isBlank()) null
-                else {
-                    val image = backendAPI.getImage(
-                        nonNullCredentials.token,
-                        item.collectionId,
-                        item.id,
-                        item.reasonImage
-                    )
-                    if (image == null) {
-                        _toastMessage.emit(
-                            "Something went wrong while attempting to load images."
-                        )
-                        return@launch
-                    }
-                    image //To extraImage
-                }
+            val preparedPastSubmission = preparePastSubmission(item) ?: return@launch
             surveyReportRepository.mutableSurveyState.update {
-                item.formData.copy(
-                    batchNum = surveyRequest.batchNumber.toString(),
-                    intraBatchId = surveyRequest.batchID.toString(),
-                    editOnlyData = EditOnlyData(
-                        recordId = item.id,
-                        reasonImage = reasonImage,
-                        extraImage = extraImage
-                    )
-                )
+                preparedPastSubmission
             }
             _navRequest.emit(PastSubmissionsNavRequest.Back)
+        }
+    }
+    fun viewSubmission(item: ItemsData) {
+        viewModelScope.launch {
+            val preparedPastSubmission = preparePastSubmission(item) ?: return@launch
+            surveyReportRepository.mutableReviewPastSubmissionState.update {
+                preparedPastSubmission
+            }
+            _navRequest.emit(PastSubmissionsNavRequest.View)
         }
     }
 }

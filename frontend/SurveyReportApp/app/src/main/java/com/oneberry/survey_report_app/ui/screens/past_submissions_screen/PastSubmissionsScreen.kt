@@ -31,6 +31,7 @@ fun PastSubmissionsScreen(
     popBackStack: () -> Boolean,
     navigateToLogin: (String) -> Unit,
     contentPadding: PaddingValues,
+    navigateToPreview: () -> Unit,
 ) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val context = LocalContext.current
@@ -58,6 +59,9 @@ fun PastSubmissionsScreen(
                     }
                     is PastSubmissionsNavRequest.ReLogin -> {
                         navigateToLogin(request.username)
+                    }
+                    PastSubmissionsNavRequest.View -> {
+                        navigateToPreview()
                     }
                 }
             }
@@ -115,7 +119,7 @@ fun PastSubmissionsScreen(
                 val surveyReq = it.item.expand.surveyRequest
                 Text("Submission ${surveyReq.batchID} for Batch ${surveyReq.batchNumber}")
                 Button(
-                    onClick = {/*TODO*/}
+                    onClick = {pastSubmissionsViewModel.viewSubmission(it.item)}
                 ){
                     Text("View")
                 }
