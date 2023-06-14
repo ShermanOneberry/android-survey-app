@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
 import com.oneberry.survey_report_app.data.GroundType
 import com.oneberry.survey_report_app.data.LocationType
+import com.oneberry.survey_report_app.data.StoredImage
 import java.io.File
 
 @Composable
@@ -96,7 +97,10 @@ fun PreviewScreen(
         Text(
             "Feasible: ${if (report.isFeasible) "Yes" else "No"}"
         )
-        ImageDisplay("Survey Image", report.reasonImage)
+        ImageDisplay("Survey Image",
+            report.reasonImage,
+            report.editOnlyData?.reasonImage
+        )
         Divider()
         val nearbyLocationText =
             if (report.nearbyDescription.isBlank()) ""
@@ -139,7 +143,11 @@ fun PreviewScreen(
         if (report.hasAdditionalNotes) {
             Divider()
             Text(report.techniciansNotes)
-            ImageDisplay("Additional Image", report.extraImage)
+            ImageDisplay(
+                "Additional Image",
+                report.extraImage,
+                report.editOnlyData?.extraImage
+            )
         }
         Divider()
         Button(
@@ -150,7 +158,7 @@ fun PreviewScreen(
     }
 }
 @Composable
-fun ImageDisplay(imageCategory: String, image: File?){
+fun ImageDisplay(imageCategory: String, image: File?, storedImage: StoredImage?){
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val bitmap =  remember {
         mutableStateOf<Bitmap?>(null)
@@ -173,6 +181,11 @@ fun ImageDisplay(imageCategory: String, image: File?){
                     modifier = Modifier.size(400.dp))
             }
             Text(image.name)
+        } ?: storedImage?.let {
+            Image(bitmap = storedImage.bitmap.asImageBitmap(),
+                contentDescription =null,
+                modifier = Modifier.size(400.dp))
+            Text(storedImage.filename)
         }
     }
 }

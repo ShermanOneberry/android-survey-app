@@ -231,7 +231,7 @@
         "listRule": "@request.auth.id != \"\"",
         "viewRule": "@request.auth.id != \"\"",
         "createRule": "@request.auth.id = assignedUser.id",
-        "updateRule": null,
+        "updateRule": "@request.auth.id = assignedUser.id && @request.auth.id = @request.data.assignedUser.id",
         "deleteRule": null,
         "options": {}
     }

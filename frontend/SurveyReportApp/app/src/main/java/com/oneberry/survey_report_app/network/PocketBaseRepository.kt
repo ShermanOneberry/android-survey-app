@@ -1,10 +1,10 @@
 package com.oneberry.survey_report_app.network
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
+import com.oneberry.survey_report_app.data.StoredImage
 import com.oneberry.survey_report_app.data.SurveyReport
 import com.oneberry.survey_report_app.network.api_body.AuthApiData
 import com.oneberry.survey_report_app.network.api_body.GetSubmissionsApiBody
@@ -15,7 +15,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
@@ -66,35 +65,75 @@ class PocketBaseRepository(apiUrl: String) {
             val jsonPart = GSON.toJson(surveyData)
                 .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             //Image part
-            val reasonImage: File = surveyData.reasonImage!!
+            val reasonImage: File? = surveyData.reasonImage
 
-            val filePart = MultipartBody.Part.createFormData(
-                "reasonImage",
-                reasonImage.name,
-                reasonImage
-                    .asRequestBody("image/*".toMediaTypeOrNull())
-            )
-            val response = if (surveyData.hasAdditionalNotes) {
-                val extraImage: File = surveyData.extraImage!!
-                val extraFilePart = MultipartBody.Part.createFormData(
-                    "additionalImage",
-                    extraImage.name,
-                    extraImage
+            val filePart = if (reasonImage != null) {
+                MultipartBody.Part.createFormData(
+                    "reasonImage",
+                    reasonImage.name,
+                    reasonImage
                         .asRequestBody("image/*".toMediaTypeOrNull())
                 )
-                service.uploadFormWithExtraImage(
-                    bearerToken,
-                    surveyIdPart, userIdPart,
-                    jsonPart,
-                    filePart, extraFilePart
+            } else {
+                val uneditedImage = surveyData.editOnlyData!!.reasonImage
+                MultipartBody.Part.createFormData(
+                    "reasonImage",
+                    uneditedImage.filename,
+                    uneditedImage.byteArray
+                        .toRequestBody("image/*".toMediaTypeOrNull())
                 )
+            }
+            val response = if (surveyData.hasAdditionalNotes) {
+                val extraImage: File? = surveyData.extraImage
+                val extraFilePart = if (extraImage != null) {
+                    MultipartBody.Part.createFormData(
+                        "additionalImage",
+                        extraImage.name,
+                        extraImage
+                            .asRequestBody("image/*".toMediaTypeOrNull())
+                    )
+                } else {
+                    val uneditedImage = surveyData.editOnlyData!!.extraImage!!
+                    MultipartBody.Part.createFormData(
+                        "reasonImage",
+                        uneditedImage.filename,
+                        uneditedImage.byteArray
+                            .toRequestBody("image/*".toMediaTypeOrNull())
+                    )
+                }
+                if (surveyData.editOnlyData != null) {
+                    service.updateFormWithExtraImage(
+                        bearerToken,
+                        surveyData.editOnlyData.recordId,
+                        surveyIdPart, userIdPart,
+                        jsonPart,
+                        filePart, extraFilePart
+                    )
+                } else {
+                    service.uploadFormWithExtraImage(
+                        bearerToken,
+                        surveyIdPart, userIdPart,
+                        jsonPart,
+                        filePart, extraFilePart
+                    )
+                }
             }else {
-                service.uploadFormNoExtraImage(
-                    bearerToken,
-                    surveyIdPart, userIdPart,
-                    jsonPart,
-                    filePart
-                )
+                if (surveyData.editOnlyData != null) {
+                    service.updateFormNoExtraImage(
+                        bearerToken,
+                        surveyData.editOnlyData.recordId,
+                        surveyIdPart, userIdPart,
+                        jsonPart,
+                        filePart
+                    )
+                } else {
+                    service.uploadFormNoExtraImage(
+                        bearerToken,
+                        surveyIdPart, userIdPart,
+                        jsonPart,
+                        filePart
+                    )
+                }
             }
             when (response) {
                 is NetworkResponse.Success -> return@withContext response.body.id
@@ -147,7 +186,7 @@ class PocketBaseRepository(apiUrl: String) {
         collectionId: String,
         recordId: String,
         imageFilename: String,
-    ): Bitmap? {
+    ): StoredImage? {
         return withContext(Dispatchers.IO) {
             val fileToken = when(
                 val response = service.getFileToken(bearerToken)
@@ -164,7 +203,16 @@ class PocketBaseRepository(apiUrl: String) {
                         "?token=$fileToken"
             val body = service.fetchImage(imageUrl).execute().body() ?: return@withContext null
             val bytes = body.bytes()
-            return@withContext BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+            val baseName = imageFilename.substringBeforeLast('_')
+            val extension = imageFilename.substringAfterLast('.')
+            val originalFileName = "$baseName.$extension"
+
+            return@withContext StoredImage (
+                bytes,
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size),
+                originalFileName,
+            )
         }
     }
 }

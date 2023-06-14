@@ -8,9 +8,7 @@ import java.time.LocalTime
 
 data class SurveyReport(
     @Transient
-    val isNewReport: Boolean = true,
-    @Transient
-    val editOnlyImages: EditOnlyImages? = null,
+    val editOnlyData: EditOnlyData? = null,
     @Transient
     val batchNum: String = "1",
     @Transient
@@ -150,11 +148,12 @@ data class SurveyReport(
             !intraBatchIdValid() ||
             surveyDate == null ||
             surveyTime == null||
-            reasonImage == null
+            (reasonImage == null && editOnlyData?.reasonImage == null)
         ) return false
 
         if (hasAdditionalNotes) {
-            if (extraImage == null || !techniciansNotesValid()) {
+            if ((extraImage == null && editOnlyData?.extraImage == null) ||
+                !techniciansNotesValid()) {
                 return false
             }
         }
@@ -198,7 +197,34 @@ enum class GroundType(val value: String){
     OTHER("<Other>")
 }
 
-data class EditOnlyImages(
-    val reasonImage: Bitmap,
-    val extraImage: Bitmap?,
+data class EditOnlyData(
+    val recordId: String,
+    val reasonImage: StoredImage,
+    val extraImage: StoredImage?,
 )
+
+data class StoredImage(
+    val byteArray: ByteArray,
+    val bitmap: Bitmap,
+    val filename: String,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as StoredImage
+
+        if (!byteArray.contentEquals(other.byteArray)) return false
+        if (bitmap != other.bitmap) return false
+        if (filename != other.filename) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = byteArray.contentHashCode()
+        result = 31 * result + bitmap.hashCode()
+        result = 31 * result + filename.hashCode()
+        return result
+    }
+}

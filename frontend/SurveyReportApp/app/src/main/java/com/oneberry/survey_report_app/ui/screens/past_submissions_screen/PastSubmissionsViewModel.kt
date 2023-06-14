@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.oneberry.survey_report_app.SurveyApplication
-import com.oneberry.survey_report_app.data.EditOnlyImages
+import com.oneberry.survey_report_app.data.EditOnlyData
 import com.oneberry.survey_report_app.data.NotNullUserCredentials
 import com.oneberry.survey_report_app.data.SurveyReportRepository
 import com.oneberry.survey_report_app.data.UserCredentialsRepository
@@ -156,10 +156,10 @@ class PastSubmissionsViewModel(
                 }
             surveyReportRepository.mutableSurveyState.update {
                 item.formData.copy(
-                    isNewReport = false,
                     batchNum = surveyRequest.batchNumber.toString(),
                     intraBatchId = surveyRequest.batchID.toString(),
-                    editOnlyImages = EditOnlyImages(
+                    editOnlyData = EditOnlyData(
+                        recordId = item.id,
                         reasonImage = reasonImage,
                         extraImage = extraImage
                     )

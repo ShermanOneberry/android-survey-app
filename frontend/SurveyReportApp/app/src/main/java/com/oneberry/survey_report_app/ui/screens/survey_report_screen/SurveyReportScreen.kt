@@ -181,7 +181,7 @@ fun SurveyReportScreen(
 
         Divider()
 
-        if (surveyReportUiState.isNewReport) {
+        if (surveyReportUiState.editOnlyData == null) {
             TextInputTemplate(
                 fieldTitle = "Batch number",
                 fieldInput = surveyReportUiState.batchNum,
@@ -232,7 +232,8 @@ fun SurveyReportScreen(
         }
         ImagePicker(
             "Reason Image for " + if (isFeasible) "Feasibility" else "Infeasibility",
-            surveyReportUiState.reasonImage,){
+            surveyReportUiState.reasonImage,
+            surveyReportUiState.editOnlyData?.reasonImage?.bitmap,){
             surveyReportViewModel.updateReasonImage(it)
         }
 
@@ -374,7 +375,8 @@ fun SurveyReportScreen(
             )
             ImagePicker(
                 "Accompanying Image",
-                surveyReportUiState.extraImage,){
+                surveyReportUiState.extraImage,
+                surveyReportUiState.editOnlyData?.extraImage?.bitmap){
                 surveyReportViewModel.updateExtraImage(it)
             }
         }
@@ -541,12 +543,17 @@ fun ImagePickerPreview() {
     var imageFile by remember {
         mutableStateOf<File?>(null)
     }
-    ImagePicker("Demo", imageFile) {
+    ImagePicker("Demo", imageFile, null) {
         imageFile = it
     }
 }
 @Composable
-fun ImagePicker(imageCategory: String, image: File?, updateImage: (File?) -> Unit){
+fun ImagePicker(
+    imageCategory: String,
+    image: File?,
+    existingImage: Bitmap?,
+    updateImage: (File?) -> Unit,
+){
     val context = LocalContext.current
     val bitmap =  remember {
         mutableStateOf<Bitmap?>(null)
@@ -577,12 +584,28 @@ fun ImagePicker(imageCategory: String, image: File?, updateImage: (File?) -> Uni
                     modifier = Modifier.size(400.dp))
             }
             Text(image.name)
+        } ?: existingImage?.let{btm ->
+            Image(bitmap = btm.asImageBitmap(),
+                contentDescription =null,
+                modifier = Modifier.size(400.dp))
+            Text("Image currently submitted")
         } ?: Text("You must have an image", color= MaterialTheme.colorScheme.error)
         Button(onClick = {
             launcher.launch("image/*")
         }) {
-            Text(text = if (image == null) "Pick image"
-            else "Pick different Image")
+            Text(
+                if (image == null){
+                    if (existingImage == null) "Pick image"
+                    else "Replace existing image"
+                } else {
+                    "Pick different Image"
+                }
+            )
+        }
+        if (image != null) {
+            Button(onClick = { updateImage(null) }) {
+                Text(if (existingImage == null) "Clear Image" else "Revert to existing image")
+            }
         }
     }
 }

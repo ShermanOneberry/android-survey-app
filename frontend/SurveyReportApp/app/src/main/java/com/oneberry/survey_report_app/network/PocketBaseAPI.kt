@@ -16,8 +16,10 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Url
 
@@ -39,11 +41,35 @@ interface PocketBaseAPI {
         @Part("assignedUser") userID: RequestBody,
         @Part("formData") formData: RequestBody,
         @Part filePart: MultipartBody.Part
-    ): NetworkResponse<PostFormApiBody, ErrorBody>@Multipart
+    ): NetworkResponse<PostFormApiBody, ErrorBody>
 
+    @Multipart
     @POST("api/collections/surveyResults/records")
     suspend fun uploadFormWithExtraImage(
         @Header("Authorization") bearerToken: String,
+        @Part("surveyRequest") surveyID: RequestBody,
+        @Part("assignedUser") userID: RequestBody,
+        @Part("formData") formData: RequestBody,
+        @Part filePart1: MultipartBody.Part,
+        @Part filePart2: MultipartBody.Part
+    ): NetworkResponse<PostFormApiBody, ErrorBody>
+
+    @Multipart
+    @PATCH("api/collections/surveyResults/records/{id}")
+    suspend fun updateFormNoExtraImage(
+        @Header("Authorization") bearerToken: String,
+        @Path("id") recordId: String,
+        @Part("surveyRequest") surveyID: RequestBody,
+        @Part("assignedUser") userID: RequestBody,
+        @Part("formData") formData: RequestBody,
+        @Part filePart: MultipartBody.Part
+    ): NetworkResponse<PostFormApiBody, ErrorBody>
+
+    @Multipart
+    @PATCH("api/collections/surveyResults/records/{id}")
+    suspend fun updateFormWithExtraImage(
+        @Header("Authorization") bearerToken: String,
+        @Path("id") recordId: String,
         @Part("surveyRequest") surveyID: RequestBody,
         @Part("assignedUser") userID: RequestBody,
         @Part("formData") formData: RequestBody,
