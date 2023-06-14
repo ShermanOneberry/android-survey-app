@@ -58,7 +58,9 @@ import com.oneberry.survey_report_app.util.getFile
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.message
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import com.vanpra.composematerialdialogs.title
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
@@ -180,7 +182,19 @@ fun SurveyReportScreen(
         }
 
         Divider()
+        val resetDialogState = rememberMaterialDialogState()
+        MaterialDialog(
+            dialogState = resetDialogState,
+            buttons = {
+                positiveButton("Ok") {
+                    surveyReportViewModel.resetForm()
+                }
+                negativeButton("Cancel")
+            }) {
+            title(text = "Clear Form?")
+            message("Do you wish to clear this form? This cannot be undone.")
 
+        }
         if (surveyReportUiState.editOnlyData == null) {
             TextInputTemplate(
                 fieldTitle = "Batch number",
@@ -196,12 +210,17 @@ fun SurveyReportScreen(
                 onInputChange = { surveyReportViewModel.updateIntraBatchId(it) },
                 errorMessage = surveyReportUiState.intraBatchIdError(),
             )
-            //TODO: Add reset button with confirmation dialog
+
+            Button(
+                onClick = { resetDialogState.show() }
+            ) {
+                Text("Reset form")
+            }
         } else {
             Text("Editing Survey ${surveyReportUiState.intraBatchId} " +
                     "for Batch ${surveyReportUiState.batchNum}")
             Button(
-                onClick = {/*TODO*/} //TODO: Make sure this has confirmation dialog
+                onClick = { resetDialogState.show() }
             ) {
                 Text("Create new survey report instead")
             }

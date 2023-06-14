@@ -78,6 +78,10 @@ class SurveyReportViewModel (
         }
     }
 
+    fun resetForm() {
+        surveyReportRepository.resetSurvey()
+    }
+
     fun updateBatchNum(newNum: String) {
         if (newNum.contains("\n")) return
         _surveyState.update { currentState ->
