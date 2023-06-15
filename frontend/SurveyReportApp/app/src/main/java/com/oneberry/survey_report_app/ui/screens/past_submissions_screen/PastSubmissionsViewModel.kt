@@ -55,12 +55,44 @@ class PastSubmissionsViewModel(
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage = _toastMessage.asSharedFlow()
     // Screen state
-    private val _pastSubmissions = MutableStateFlow<PastSubmissionsState?>(null)
+    private val _pastSubmissions = MutableStateFlow(PastSubmissionsState())
     val pastSubmissions = _pastSubmissions.asStateFlow()
 
     init {
         updatePastSubmissions(1)
     }
+
+    fun updateBlockFilter(newBlock: String) {
+        _pastSubmissions.update {
+            it.copy(
+                searchBox = it.searchBox.copy(
+                    block = newBlock
+                )
+            )
+        }
+    }
+
+    fun updateStreetFilter(newStreet: String) {
+        _pastSubmissions.update {
+            it.copy(
+                searchBox = it.searchBox.copy(
+                    street = newStreet
+                )
+            )
+        }
+    }
+    fun triggerListWithNewFilter(){
+        _pastSubmissions.update {
+            it.copy(
+                searchBox = it.searchBox.copy(
+                    blockFilter = it.searchBox.block,
+                    streetFilter = it.searchBox.street,
+                )
+            )
+        }
+        updatePastSubmissions(1)
+    }
+
     private suspend fun attemptGetCredentials(): NotNullUserCredentials? {
         val credentials = credentialFlow.first()
         if (credentials.username == null) {
@@ -86,17 +118,32 @@ class PastSubmissionsViewModel(
         }
         return nonNullCredentials
     }
+    fun attemptGetNextPage() {
+        val viewState = pastSubmissions.value.apiState
+        if (viewState != null && viewState.page < viewState.totalPages) {
+            updatePastSubmissions(viewState.page+1)
+        }
+    }
+    fun attemptGetPrevPage() {
+        val viewState = pastSubmissions.value.apiState
+        if (viewState != null && viewState.page > 1) {
+            updatePastSubmissions(viewState.page-1)
+        }
+    }
     private fun updatePastSubmissions(page: Int) {
         viewModelScope.launch {
             val nonNullCredentials = attemptGetCredentials() ?: return@launch
+            val searchState = pastSubmissions.value.searchBox
             val pastSubmissionsData = backendAPI.getPastSubmissionsList(
                 nonNullCredentials.token,
+                searchState.blockFilter,
+                searchState.streetFilter,
                 page,
             )
             if (pastSubmissionsData == null) {
                 _toastMessage.emit("Something went wrong while loading.")
             } else {
-                var currentMaxBatchNumber = pastSubmissions.value?.latestBatchNumber
+                var currentMaxBatchNumber = pastSubmissions.value.apiState?.latestBatchNumber
                 if (currentMaxBatchNumber == null) {
                     currentMaxBatchNumber =
                         backendAPI.getMaxBatchNumber(nonNullCredentials.token)
@@ -106,19 +153,25 @@ class PastSubmissionsViewModel(
                     }
                 }
                 _pastSubmissions.update { it ->
-                    PastSubmissionsState(
-                        page = pastSubmissionsData.page,
-                        perPage = pastSubmissionsData.perPage,
-                        totalPages = pastSubmissionsData.totalPages,
-                        totalItems = pastSubmissionsData.totalItems,
-                        items = pastSubmissionsData.items.map {item ->
-                            AugmentedItemData(
-                                item = item,
-                                sameUser = item.assignedUser == nonNullCredentials.id
-                            )
-                        },
+                    it.copy (
+                        searchBox = it.searchBox.copy(
+                            block = it.searchBox.blockFilter,
+                            street = it.searchBox.streetFilter,
+                        ),
+                        apiState = PastSubmissionsApiState(
+                            page = pastSubmissionsData.page,
+                            perPage = pastSubmissionsData.perPage,
+                            totalPages = pastSubmissionsData.totalPages,
+                            totalItems = pastSubmissionsData.totalItems,
+                            items = pastSubmissionsData.items.map {item ->
+                                AugmentedItemData(
+                                    item = item,
+                                    sameUser = item.assignedUser == nonNullCredentials.id
+                                )
+                            },
 
-                        latestBatchNumber = currentMaxBatchNumber
+                            latestBatchNumber = currentMaxBatchNumber
+                        )
                     )
                 }
             }

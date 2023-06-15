@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oneberry.survey_report_app.R
+import com.oneberry.survey_report_app.ui.composables.TextInputTemplate
 
 @Composable
 fun PastSubmissionsScreen(
@@ -68,33 +70,8 @@ fun PastSubmissionsScreen(
     }
     //Not using 'by' to allow for smart cast
     val pastSubmissions = pastSubmissionsViewModel.pastSubmissions.collectAsState().value
-    if (pastSubmissions == null || pastSubmissions.totalItems == 0 ) {
-        Column(
-            modifier = Modifier
-                .padding(contentPadding) //Margin
-                .verticalScroll(rememberScrollState())
-                .padding(mediumPadding), //Padding
-            verticalArrangement = Arrangement.spacedBy(
-                space = mediumPadding,
-                alignment = Alignment.CenterVertically
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = if (pastSubmissions == null) "Loading past submissions..."
-                    else "No past submissions found...",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-            }
-        }
-        //TODO: Maybe consider adding a 'proper' loading/empty screen instead?
-        return //Suppress rendering
-    }
+    val apiState = pastSubmissions.apiState
+    val searchBox = pastSubmissions.searchBox
     LazyColumn(
         modifier = Modifier
             .padding(contentPadding) //Margin
@@ -110,14 +87,53 @@ fun PastSubmissionsScreen(
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ){
-        items(pastSubmissions.items) {
+        item {
+            Text("Filter by Address")
+            TextInputTemplate(
+                fieldTitle = "Block number",
+                fieldInput = searchBox.block,
+                isFieldValid = true,
+                onInputChange = { pastSubmissionsViewModel.updateBlockFilter(it) },
+                errorMessage = null,
+            )
+            TextInputTemplate(
+                fieldTitle = "Street",
+                fieldInput = searchBox.street,
+                isFieldValid = true,
+                onInputChange = { pastSubmissionsViewModel.updateStreetFilter(it) },
+                errorMessage = null,
+            )
+            Button(onClick = { pastSubmissionsViewModel.triggerListWithNewFilter()}) {
+                Text("Search with new filter")
+            }
+        }
+        if (apiState == null || apiState.totalItems == 0 ) {
+            item{
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = if (apiState == null) "Loading past submissions..."
+                        else "No past submissions found...",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+            }
+            //TODO: Maybe consider adding a 'proper' loading/empty screen instead?
+            return@LazyColumn //Suppress rendering
+        }
+        //TODO: Add filter input here
+        items(apiState.items) {
+            Divider()
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 val surveyReq = it.item.expand.surveyRequest
-                Text("Submission ${surveyReq.batchID} for Batch ${surveyReq.batchNumber}")
+                Text("Batch ${surveyReq.batchNumber}\nReport ${surveyReq.batchID}")
                 Button(
                     onClick = {pastSubmissionsViewModel.viewSubmission(it.item)}
                 ){
@@ -126,9 +142,31 @@ fun PastSubmissionsScreen(
                 Button(
                     onClick = {pastSubmissionsViewModel.editSubmission(it.item)},
                     enabled = it.sameUser &&
-                            surveyReq.batchNumber == pastSubmissions.latestBatchNumber
+                            surveyReq.batchNumber == apiState.latestBatchNumber
                 ){
                     Text("Edit")
+                }
+            }
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    space = mediumPadding,
+                    alignment = Alignment.CenterHorizontally
+                ),
+            ) {
+                if (apiState.page > 1 ) {
+                    Button(onClick = { pastSubmissionsViewModel.attemptGetPrevPage() }) {
+                        Text("Previous")
+                    }
+                }
+                Text("Page ${apiState.page}/${apiState.totalPages}")
+                if (apiState.page < apiState.totalPages) {
+                    Button(onClick = { pastSubmissionsViewModel.attemptGetNextPage() }) {
+                        Text("Next")
+                    }
                 }
             }
         }
