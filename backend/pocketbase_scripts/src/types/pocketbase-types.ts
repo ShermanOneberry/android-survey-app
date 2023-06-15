@@ -3,6 +3,7 @@
 */
 
 export enum Collections {
+	Bots = "bots",
 	SurveyDetails = "surveyDetails",
 	SurveyResults = "surveyResults",
 	Users = "users",
@@ -32,6 +33,8 @@ export type AuthSystemFields<T = never> = {
 
 // Record types for each collection
 
+export type BotsRecord = never
+
 export type SurveyDetailsRecord = {
 	batchNumber?: number
 	batchID?: number
@@ -56,6 +59,7 @@ export type UsersRecord = {
 }
 
 // Response types include system fields and match responses from the PocketBase API
+export type BotsResponse = Required<BotsRecord> & AuthSystemFields
 export type SurveyDetailsResponse = Required<SurveyDetailsRecord> & BaseSystemFields
 export type SurveyResultsResponse<TformData = unknown, Texpand = unknown> = Required<SurveyResultsRecord<TformData>> & BaseSystemFields<Texpand>
 export type UsersResponse = Required<UsersRecord> & AuthSystemFields
@@ -63,12 +67,14 @@ export type UsersResponse = Required<UsersRecord> & AuthSystemFields
 // Types containing all Records and Responses, useful for creating typing helper functions
 
 export type CollectionRecords = {
+	bots: BotsRecord
 	surveyDetails: SurveyDetailsRecord
 	surveyResults: SurveyResultsRecord
 	users: UsersRecord
 }
 
 export type CollectionResponses = {
+	bots: BotsResponse
 	surveyDetails: SurveyDetailsResponse
 	surveyResults: SurveyResultsResponse
 	users: UsersResponse

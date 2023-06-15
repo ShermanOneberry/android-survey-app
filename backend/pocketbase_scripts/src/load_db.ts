@@ -70,7 +70,7 @@ function getAllExcelFiles(directoryPath:string) {
   }
 
 async function main() {
-    await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
+    await pb.collection(Collections.Bots).authWithPassword(process.env.BOT_USERNAME, process.env.BOT_PASSWORD)
     console.log('Authentication successful');
     for (const excel_path of getAllExcelFiles("./proposed_sites")) {
         console.log(`Processing file: \`${excel_path}\``)

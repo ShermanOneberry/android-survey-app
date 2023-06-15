@@ -240,7 +240,7 @@ async function generate_batch_report(batch_num: number){
     fs.writeFileSync(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`, buffer);
 }
 async function main() {
-    await pb.admins.authWithPassword(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD)
+    await pb.collection(Collections.Bots).authWithPassword(process.env.BOT_USERNAME, process.env.BOT_PASSWORD)
     console.log('Authentication successful');
     const batch_num = 1
     await generate_batch_report(batch_num)
