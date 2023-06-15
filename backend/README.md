@@ -34,9 +34,8 @@ Commands:
   - TODO: Get the load folder to be changable by cli args, with sensible defaults
 - `npm run generate_report` will generate the desired Excel reports from the site surveys and the data obtained from the `load_db` script. Currently, the generated reports will be placed in the `generated_reports` folder.
   - TODO: Let the folder that the reports be placed in be configurable by cli args, with sensible defaults
-
-//TODO: Add a guide here explaining the different components, and where to put in request excel files,
-and where to collect files
+- `npm run build` is a development only command, meant to be run only when there is a signifcant change to the Pocketbase backend. 
+(E.G: New/Renamed/Deleted collection(s) or collection member(s))
 
 ## Contributing
 
