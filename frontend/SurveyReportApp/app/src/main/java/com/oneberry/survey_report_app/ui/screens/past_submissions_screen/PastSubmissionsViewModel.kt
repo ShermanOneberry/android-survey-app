@@ -85,8 +85,8 @@ class PastSubmissionsViewModel(
         _pastSubmissions.update {
             it.copy(
                 searchBox = it.searchBox.copy(
-                    blockFilter = it.searchBox.block,
-                    streetFilter = it.searchBox.street,
+                    blockFilter = it.searchBox.block.trim(),
+                    streetFilter = it.searchBox.street.trim(),
                 )
             )
         }
@@ -154,10 +154,6 @@ class PastSubmissionsViewModel(
                 }
                 _pastSubmissions.update { it ->
                     it.copy (
-                        searchBox = it.searchBox.copy(
-                            block = it.searchBox.blockFilter,
-                            street = it.searchBox.streetFilter,
-                        ),
                         apiState = PastSubmissionsApiState(
                             page = pastSubmissionsData.page,
                             perPage = pastSubmissionsData.perPage,

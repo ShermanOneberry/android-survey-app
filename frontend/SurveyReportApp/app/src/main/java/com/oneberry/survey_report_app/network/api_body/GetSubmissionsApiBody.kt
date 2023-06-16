@@ -23,9 +23,11 @@ data class ItemsData (
     val expand: Expand
 )
 data class Expand (
-    val surveyRequest: SurveyRequestId,
+    val surveyRequest: SurveyRequest,
 )
-data class SurveyRequestId (
+data class SurveyRequest (
     val batchNumber: Int,
     val batchID: Int,
+    val block: String,
+    val streetName: String,
 )
