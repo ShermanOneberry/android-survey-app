@@ -124,7 +124,6 @@ fun PastSubmissionsScreen(
             //TODO: Maybe consider adding a 'proper' loading/empty screen instead?
             return@LazyColumn //Suppress rendering
         }
-        //TODO: Add filter input here
         items(apiState.items) {
             Divider()
             Row(

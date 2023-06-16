@@ -85,7 +85,7 @@ fun LoginScreen(
             style = MaterialTheme.typography.titleLarge,
         )
 
-        TextField( //TODO: Replace these with text box template
+        TextField(
             label = { Text(text = "Username") },
             value = uiState.username,
             enabled = uiState.uiEnabled,
