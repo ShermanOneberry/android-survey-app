@@ -257,5 +257,30 @@
         "updateRule": "@request.auth.id = assignedUser.id && @request.auth.id = @request.data.assignedUser.id && @request.auth.id ?= @collection.users.id",
         "deleteRule": null,
         "options": {}
+    },
+    {
+        "id": "wvpld86o2bqxwsf",
+        "name": "batches",
+        "type": "view",
+        "system": false,
+        "schema": [
+            {
+                "id": "iquvzdru",
+                "name": "data_updated",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "indexes": [],
+        "listRule": "@request.auth.id ?= @collection.bots.id",
+        "viewRule": null,
+        "createRule": null,
+        "updateRule": null,
+        "deleteRule": null,
+        "options": {
+            "query": "SELECT \n  surveyDetails.batchNumber as id,\n  MAX(MAX(surveyDetails.updated),MAX(surveyResults.updated)) as data_updated\nFROM surveyDetails\nINNER JOIN surveyResults on surveyDetails.id == surveyResults.surveyRequest\nGROUP BY batchNumber"
+        }
     }
 ]

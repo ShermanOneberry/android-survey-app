@@ -1,6 +1,6 @@
 import PocketBase from 'pocketbase';
 import { TformData, Texpand } from "./types/pocketbase-get-types.ts"
-import {Collections, SurveyResultsResponse} from "./types/pocketbase-types.ts"
+import {BatchesResponse, Collections, SurveyResultsResponse} from "./types/pocketbase-types.ts"
 import {createExcelBaseTemplate} from "./report_template.ts"
 import {format, parse} from "date-fns"
 import xl, {Style} from "excel4node"
@@ -10,8 +10,9 @@ import axios from 'axios';
 import dotenv from 'dotenv'
 dotenv.config()
 
-const pb = new PocketBase(process.env.POCKETBASE_URL);
+const last_run_file = "generated_reports/last_known_update.log"
 
+const pb = new PocketBase(process.env.POCKETBASE_URL);
 
 async function axios_get_image_buffer(url: string):Promise<Buffer|null> {
     try {
@@ -239,12 +240,30 @@ async function generate_batch_report(batch_num: number){
     const buffer = await workbook.writeToBuffer();
     fs.writeFileSync(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`, buffer);
 }
+async function get_batches_to_generate(previous_latest_update: string){
+    const filterObject = previous_latest_update.trim().length === 0
+        ? {} : {filter: `data_updated > "${previous_latest_update}"`}
+    const batches = await pb.collection(Collections.Batches).getFullList<BatchesResponse<string>>(filterObject)
+    console.log(batches)
+    return {
+        batch_numbers: batches.map(batch => Number.parseInt(batch.id)),
+        latest_update: batches.map(batch => batch.data_updated)
+            .reduce((max, current) => {return current.localeCompare(max) > 0 ? current : max}, "")
+    }
+}
 async function main() {
     await pb.collection(Collections.Bots).authWithPassword(process.env.BOT_USERNAME, process.env.BOT_PASSWORD)
     console.log('Authentication successful');
-    const batch_num = 1
-    await generate_batch_report(batch_num)
-    console.log(`Completed report generation for batch ${batch_num}`)
+    let new_last_run_dateTime = "" //TODO: Replace this with 
+    if (fs.existsSync(last_run_file)) {
+        new_last_run_dateTime = fs.readFileSync(last_run_file, 'utf8');
+    }
+    const {batch_numbers, latest_update} = await get_batches_to_generate(new_last_run_dateTime)
+    for (const batch_num of batch_numbers) {
+        await generate_batch_report(batch_num)
+        console.log(`Completed report generation for batch ${batch_num}`)
+    }
+    fs.writeFileSync(last_run_file, latest_update, 'utf8');
 }
 
 await main().catch((error) => {
