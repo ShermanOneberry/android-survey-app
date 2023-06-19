@@ -255,7 +255,7 @@ const last_run_file = "generated_reports/.last_known_update.dat"
 async function main() {
     await pb.collection(Collections.Bots).authWithPassword(process.env.BOT_USERNAME, process.env.BOT_PASSWORD)
     console.log('Authentication successful');
-    let new_last_run_dateTime = "" //TODO: Replace this with 
+    let new_last_run_dateTime = ""  
     if (fs.existsSync(last_run_file)) {
         new_last_run_dateTime = fs.readFileSync(last_run_file, 'utf8');
     }
