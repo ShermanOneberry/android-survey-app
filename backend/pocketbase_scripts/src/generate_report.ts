@@ -12,6 +12,11 @@ dotenv.config()
 
 const pb = new PocketBase(process.env.POCKETBASE_URL);
 
+let folderPath = "generated_reports"
+if (process.argv.length > 2) {
+    folderPath = process.argv[2]
+}
+
 async function axios_get_image_buffer(url: string):Promise<Buffer|null> {
     try {
         const response = await axios
@@ -236,7 +241,7 @@ async function generate_batch_report(batch_num: number){
         await processSingleRecord(template, record)
     }
     const buffer = await workbook.writeToBuffer();
-    fs.writeFileSync(`./generated_reports/Contractor Deployment Plan Batch ${batch_num}.xlsx`, buffer);
+    fs.writeFileSync(`${folderPath}/Contractor Deployment Plan Batch ${batch_num}.xlsx`, buffer);
 }
 async function get_batches_to_generate(previous_latest_update: string){
     const filterObject = previous_latest_update.trim().length === 0

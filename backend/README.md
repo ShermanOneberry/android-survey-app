@@ -63,9 +63,12 @@ Commands:
 - `npm run load_db` will take Excel files in the folder `proposed_sites`, and load them onto the Pocketbase backend. This is needed for both upload verification, and for later report generation. 
   - *NOTE* that the command is idempotent, and that you can also run the command on updated Excel files.
   - *NOTE* that the Excel files are expected to follow a very particular format, and that any changes 
-  - TODO: Get the load folder to be changable by cli args, with sensible defaults
-- `npm run generate_report` will generate the desired Excel reports from the site surveys and the data obtained from the `load_db` script. Currently, the generated reports will be placed in the `generated_reports` folder.
-  - TODO: Let the folder that the reports be placed in be configurable by cli args, with sensible defaults
+  - If you wish to change where the script will look for reports, run the command as follows: `npm run load_db -- example/new/path`. 
+    - Note that for reference, the command `npm run load_db -- proposed_sites` is equilivant to the default behavour. 
+    - Further note that the target folder will be checked recursively, with folders inside the target folders being checked. 
+- `npm run generate_report` will generate the desired Excel reports from the site surveys and the data obtained from the `load_db` script. Currently, the generated reports will be placed in the `generated_reports` folder. 
+  - If you wish to change where the reports will be saved to, run the command as follows: `npm run generate_report -- example/new/path`. 
+    - Note that for reference, the command `npm run generate_report -- generated_reports` is equilivant to the default behavour.
 - `npm run build` is a development only command, meant to be run only when there is a signifcant change to the Pocketbase backend. 
 (E.G: New/Renamed/Deleted collection(s) or collection member(s))
   - NOTE: Maunally setting only one of the system fields but not the other (I.E: `created`, `updated`), causes the other system field to not be auto-generated. The resulting missing system field breaks type generation. 

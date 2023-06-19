@@ -9,6 +9,11 @@ dotenv.config()
 const pb = new PocketBase(process.env.POCKETBASE_URL);
 type SurveyDetailsCustomRecord = Required< {id:string} & SurveyDetailsRecord >
 
+let folderPath = "proposed_sites"
+if (process.argv.length > 2) {
+    folderPath = process.argv[2]
+}
+
 async function load_proposed_sites(path: string) {
     const workbook = new Excel.Workbook()
     await workbook.xlsx.readFile(path)
@@ -72,7 +77,7 @@ function getAllExcelFiles(directoryPath:string) {
 async function main() {
     await pb.collection(Collections.Bots).authWithPassword(process.env.BOT_USERNAME, process.env.BOT_PASSWORD)
     console.log('Authentication successful');
-    for (const excel_path of getAllExcelFiles("./proposed_sites")) {
+    for (const excel_path of getAllExcelFiles(folderPath)) {
         console.log(`Processing file: \`${excel_path}\``)
         await load_proposed_sites(excel_path)
         console.log(`Completed file: \`${excel_path}\``)
