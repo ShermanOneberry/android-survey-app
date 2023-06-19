@@ -10,8 +10,6 @@ import axios from 'axios';
 import dotenv from 'dotenv'
 dotenv.config()
 
-const last_run_file = "generated_reports/last_known_update.log"
-
 const pb = new PocketBase(process.env.POCKETBASE_URL);
 
 async function axios_get_image_buffer(url: string):Promise<Buffer|null> {
@@ -251,6 +249,9 @@ async function get_batches_to_generate(previous_latest_update: string){
             .reduce((max, current) => {return current.localeCompare(max) > 0 ? current : max}, "")
     }
 }
+
+const last_run_file = "generated_reports/.last_known_update.log"
+
 async function main() {
     await pb.collection(Collections.Bots).authWithPassword(process.env.BOT_USERNAME, process.env.BOT_PASSWORD)
     console.log('Authentication successful');
