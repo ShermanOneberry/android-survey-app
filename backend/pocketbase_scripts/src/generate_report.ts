@@ -250,7 +250,7 @@ async function get_batches_to_generate(previous_latest_update: string){
     }
 }
 
-const last_run_file = "generated_reports/.last_known_update.log"
+const last_run_file = "generated_reports/.last_known_update.dat"
 
 async function main() {
     await pb.collection(Collections.Bots).authWithPassword(process.env.BOT_USERNAME, process.env.BOT_PASSWORD)
