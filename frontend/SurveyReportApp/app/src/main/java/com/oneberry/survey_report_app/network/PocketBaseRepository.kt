@@ -53,7 +53,7 @@ class PocketBaseRepository(apiUrl: String) {
         surveyData: SurveyReport,
     ) : String? {
         return withContext(Dispatchers.IO) {
-            if (!surveyData.isFeasible) return@withContext null
+            if (!surveyData.overallSurveyValid()) return@withContext null
             val surveyIdPart =
                 "${surveyData.batchNum.trim()}_${surveyData.intraBatchId.trim()}"
                     .padEnd(15,'_')
