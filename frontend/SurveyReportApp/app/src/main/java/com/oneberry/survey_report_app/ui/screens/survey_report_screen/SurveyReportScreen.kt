@@ -516,9 +516,6 @@ fun ImagePicker(
     updateImage: (File?) -> Unit,
 ){
     val context = LocalContext.current
-    val bitmap =  remember {
-        mutableStateOf<Bitmap?>(null)
-    }
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -535,15 +532,10 @@ fun ImagePicker(
     ){
         Text(imageCategory)
         image?.let {
-            val source = ImageDecoder
-                .createSource(it)
-            bitmap.value = ImageDecoder.decodeBitmap(source)
-
-            bitmap.value?.let {  btm ->
-                Image(bitmap = btm.asImageBitmap(),
-                    contentDescription =null,
-                    modifier = Modifier.size(400.dp))
-            }
+            val source = ImageDecoder.createSource(it)
+            Image(bitmap = ImageDecoder.decodeBitmap(source).asImageBitmap(),
+                contentDescription =null,
+                modifier = Modifier.size(400.dp))
             Text(image.name)
         } ?: existingImage?.let{btm ->
             Image(bitmap = btm.asImageBitmap(),

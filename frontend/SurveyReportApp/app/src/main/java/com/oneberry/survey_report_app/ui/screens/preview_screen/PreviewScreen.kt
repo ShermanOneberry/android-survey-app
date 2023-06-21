@@ -20,8 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -190,9 +188,6 @@ fun PreviewScreen(
 @Composable
 fun ImageDisplay(imageCategory: String, image: File?, storedImage: StoredImage?){
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
-    val bitmap =  remember {
-        mutableStateOf<Bitmap?>(null)
-    }
     Column(
         modifier = Modifier
             .padding(mediumPadding),
@@ -201,15 +196,10 @@ fun ImageDisplay(imageCategory: String, image: File?, storedImage: StoredImage?)
     ){
         Text(imageCategory)
         image?.let {
-            val source = ImageDecoder
-                .createSource(it)
-            bitmap.value = ImageDecoder.decodeBitmap(source)
-
-            bitmap.value?.let {  btm ->
-                Image(bitmap = btm.asImageBitmap(),
-                    contentDescription =null,
-                    modifier = Modifier.size(400.dp))
-            }
+            val source = ImageDecoder.createSource(it)
+            Image(bitmap = ImageDecoder.decodeBitmap(source).asImageBitmap(),
+                contentDescription =null,
+                modifier = Modifier.size(400.dp))
             Text(image.name)
         } ?: storedImage?.let {
             Image(bitmap = storedImage.bitmap.asImageBitmap(),
