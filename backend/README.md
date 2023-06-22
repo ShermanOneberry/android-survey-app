@@ -57,7 +57,7 @@ The background scripts `load_db` and `generate_report` are avalaible, and are in
 
 Credentials for a bot account are needed from the `bots` collection of Pocketbase, in order for the scripts to run.
 Store them at `backend\pocketbase_scripts\.env`, as well as the URL of the Pocketbase backend.
-See `backend\pocketbase_scripts\.env_example` for an example of how to formant the `.env` file. 
+See `backend\pocketbase_scripts\.env_example` for an example of how to format the `.env` file. 
 
 Commands:
 - `npm run load_db` will take Excel files in the folder `proposed_sites`, and load them onto the Pocketbase backend. This is needed for both upload verification, and for later report generation. 
