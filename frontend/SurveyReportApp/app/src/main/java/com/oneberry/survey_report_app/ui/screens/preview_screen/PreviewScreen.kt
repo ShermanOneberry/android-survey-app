@@ -113,6 +113,9 @@ fun PreviewScreen(
             "Batch no. ${report.batchNum}; " +
                     "Survey ${report.intraBatchId}"
         )
+        Text(
+            "Date: ${report.surveyDate}, Time: ${report.surveyTime}"
+        )
         Divider()
         Text(
             "Feasible: ${if (report.isFeasible) "Yes" else "No"}"
