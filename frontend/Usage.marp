@@ -1,0 +1,325 @@
+---
+marp: true
+theme: default
+class: invert
+paginate: true
+---
+
+# **Survey Report App**
+
+How to use the survey report app
+
+https://github.com/ShermanOneberry/android-survey-app
+
+---
+
+![bg left:30% 80%](screenshots/01.png)
+
+# Initial screen
+
+When you first open the app, you will see this screen. To do most things, you will need to log in. Click the 'Login' button to do so.
+
+---
+
+![bg left:30% 80%](screenshots/02.png)
+
+# Login screen
+
+You will see this screen with a field for username and password.
+
+---
+
+![bg left:30% 80%](screenshots/03.png)
+
+# Login screen
+
+Once filled in, click the 'Login' button.
+
+---
+
+![bg left:30% 80%](screenshots/04.png)
+
+# Main screen 1
+
+On this screen, you will see:
+- The current logged in user at the top, with options to change the user or log out, 
+- A button to view past submssions
+- The form below
+  - Visible in this screenshot are options to pick the date and time of the survey
+
+---
+
+![bg left:50% 80%](screenshots/05.png)
+![bg left:50% 80%](screenshots/06.png)
+
+# Form Date
+
+This is the dialog to pick what date the survey was done.
+
+---
+
+![bg left:50% 80%](screenshots/07.png)
+![bg left:50% 80%](screenshots/08.png)
+
+# Form Time
+
+This is the dialog to pick what time the survey was done.
+
+---
+
+![bg left:30% 80%](screenshots/09.png)
+
+# Main screen 2 (Feasible variant)
+
+Lower down on the form, you will see:
+- A toggle to indicate whether deployment is feasible or not. 
+- An image picker to help explain why a deployment is feasble or not.
+- Fields to indicate the number of boxes and cameras to deploy
+- A field to indicate the distance from the camera to the suspect units
+
+
+---
+
+![bg left:50% 80%](screenshots/09.png)
+![bg left:50% 80%](screenshots/10.png)
+
+# Selecting the Reason Image
+
+To pick an image, press the 'Pick image' button. This will bring you to the Android image selection dialog. 
+
+Note that for this current version, you will need to manually take the desired image beforehand in a camera app.
+
+---
+
+![bg left:30% 80%](screenshots/11.png)
+
+# Image picker (Selected variant)
+
+Once you have selected an image, you will see the selected image, and 2 buttons. 
+
+- The first button will allow you to select a different image.
+- The second button will allow you to clear the current selection completely.
+
+---
+
+![bg left:30% 80%](screenshots/12.png)
+
+# Main screen 3 
+
+Lower down on the form, you will see:
+
+- Form inputs for the camera location, which has:
+  - A field consisting of a location type selector
+  - Location type specific fields (if any)
+  - Fields to input the Block and Street location
+  - An optional field for nearby features to clarify location
+- A toggle to add additional information (Defaults to no) 
+- A button to do final preview of the survey before submitting. 
+
+---
+
+![bg left:30% 80%](screenshots/13.png)
+
+# Location Types
+
+The location types are as follows:
+- Corridor
+- Stairway
+- Ground
+- Carpark
+- Roof
+
+---
+
+![bg left:30% 80%](screenshots/12.png)
+
+# Location Type (Corridor)
+
+This location type is for when the camera is deployed on a specific floor of a HDB flat, that is not the ground level. 
+
+The only specific field for the ground location type is the 'Corridor Level'.
+
+---
+
+![bg left:30% 80%](screenshots/14.png)
+
+# Location Type (Stairway)
+
+This location type is for when the camera is deployed in a stairway, between two floors
+
+The only specific field for the stairway location type is the 'Lower level'. Note that a preview of the description is also displayed
+
+---
+
+![bg left:50% 80%](screenshots/15.png)
+![bg left:50% 80%](screenshots/16.png)
+
+# Location Type (Ground)
+
+This location type is for when the camera is deployed on the ground floor. 
+
+The only specific field for the stairway location type is the 'Ground Type'. Default is set to the generic 'Other', although, 'Void deck' and 'Grass patch' are possible options.
+
+---
+
+![bg left:50% 80%](screenshots/17.png)
+![bg left:50% 80%](screenshots/18.png)
+
+# Location Type (Ground Variations)
+
+These other ground types, and the default type, don't have additional fields associated with them.
+
+---
+
+![bg left:30% 80%](screenshots/19.png)
+
+# Location Type (Carpark)
+
+This location type is for when the camera is deployed at a Multi-Story Carpark.
+
+The only specific field for the stairway location type is the 'Carpark Level'. 
+
+---
+
+![bg left:30% 80%](screenshots/20.png)
+
+# Location Type (Roof)
+
+This location type is for when the camera is deployed on the Roof of a HDB.
+
+This does not have any specific fields associated with this type. 
+
+---
+
+![bg left:30% 80%](screenshots/21.png)
+
+# Main screen (Additional Notes)
+
+If you toggle the addtional notes to 'Yes', you will be able to add the following fields:
+- Text field for additional notes
+- An image picker to go with the additional notes
+
+---
+
+![bg left:50% 80%](screenshots/22.png)
+![bg left:50% 80%](screenshots/23.png)
+
+# Main screen (Additional Notes)
+
+Note that you will need to include both. You may not have only one or the other. 
+
+Inputting both of the fields occurs as usual, with the dialog for the image picker being the same as with the reason image. 
+
+---
+
+![bg left:60% 90%](screenshots/24.png)
+![bg left:60% 90%](screenshots/25.png)
+![bg left:60% 90%](screenshots/26.png)
+
+# Main screen (Not feasible)
+
+If earlier you inidicated that a deployment was not feasible, most of the form will not be needed to be included, and you will only need to explain why a deployment is not feasible.
+
+Note that you will still need a reason image. 
+
+---
+
+![bg left:50% 80%](screenshots/27.png)
+![bg left:50% 80%](screenshots/28.png)
+
+# Main screen (Not feasible - 2)
+
+Note that you still have the option to add additional notes, with the requirement to add both the text and image still present.
+
+---
+
+![bg left:50% 80%](screenshots/29.png)
+![bg left:50% 80%](screenshots/30.png)
+
+# Preview screen
+
+Once you have finished with the form, you may press the 'Preview' button to reach this screen, which presents a summary of your survey information. (You will not be able to reach this screen if your form is incomplete in some way)
+
+Once you are read to submit, click the 'Submit' button.
+
+---
+
+![bg left:30% 80%](screenshots/31.png)
+
+# Preview screen (Additional notes)
+
+Note this variation on the preview screen, if you have included additional notes.
+
+---
+
+![bg left:30% 80%](screenshots/32.png)
+
+# Successful submission
+
+Once you click the submit button, you will see a toast indicating success once the submission has went through. If this does not show up, your form has not been submitted.
+
+---
+
+![bg left:50% 80%](screenshots/04.png)
+![bg left:50% 80%](screenshots/33.png)
+
+# Clearing the form
+
+If you wish to reset the form at any time, you may press the 'Reset form' button, and click 'OK' on the subsequent dialog.
+
+---
+
+![bg left:50% 80%](screenshots/04.png)
+![bg left:50% 80%](screenshots/34.png)
+
+# Viewing past submissions
+
+If you wish to either view or edit past submissions, click on the 'View past submissions' button.
+
+Note that the past submission screen supports pagenation, and Next/Back buttons will appear at the bottom of the screen after scrolling down, when applicable.
+
+To go back to the form screen, use the Android Back button
+
+---
+
+![bg left:60% 90%](screenshots/35.png)
+![bg left:60% 90%](screenshots/36.png)
+![bg left:60% 90%](screenshots/37.png)
+
+# Filtering past submissions
+
+You may filter on past submissions by Block number and/or Street name. This filtering works as an arbitary substring search, with '7' accepting '17','71, and '171' for example.
+
+---
+
+![bg left:60% 80%](screenshots/34.png)
+![bg left:60% 80%](screenshots/38.png)
+![bg left:60% 80%](screenshots/39.png)
+
+# Viewing past submissions
+
+You may view past submissions by clicking on the 'View' button of the corresponding Survey. 
+
+Clicking on 'Back to Past submssions' will return you to the Past Submissions screen.
+
+---
+
+![bg left:50% 80%](screenshots/34.png)
+![bg left:50% 80%](screenshots/40.png)
+
+# Editing past submissions
+
+You may edit past submissions by clicking on the 'Edit' button of the corresponding Survey. 
+
+Note that this will overwrite any existing surveys you may be editing. 
+
+To exit edit mode of the form screen, you will need to press the 'Create new survey report instead' button, and click 'OK' in the dialog that pops up.
+
+---
+
+![bg left:50% 80%](screenshots/41.png)
+![bg left:50% 80%](screenshots/42.png)
+
+# Editing past submissions (Existing images)
+
+Note that the image picker will have a different UI when the survey being editted has an exisiting image.
